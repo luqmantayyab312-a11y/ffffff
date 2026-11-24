@@ -96,6 +96,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -1449,7 +1450,7 @@ fun ShopDialog(
   @Suppress("UNUSED_PARAMETER") vipCount: Int,
   @Suppress("UNUSED_PARAMETER") notice: String?,
   @Suppress("UNUSED_PARAMETER") onBuyBooster: (BoosterType) -> Unit,
-  @Suppress("UNUSED_PARAMETER") onClaimFreeCoins: () -> Unit,
+  onClaimFreeCoins: () -> Unit,
   onDismiss: () -> Unit,
 ) {
   BackHandler(onBack = onDismiss)
@@ -1564,6 +1565,333 @@ fun ShopDialog(
           contentScale = ContentScale.FillBounds,
           modifier = Modifier.fillMaxSize(),
         )
+
+        val chestW = cardW * 0.250f
+        val chestH = chestW * (114f / 116f)
+        val chestCenterX = cardW * 0.332f
+        val chestTop = cardH * 0.082f
+        val chestCenterY = chestTop + chestH * 0.50f
+
+        val coinPileW = cardW * 0.118f
+        val coinPileH = coinPileW * (194f / 146f)
+
+        val starterChestAnim = rememberInfiniteTransition(label = "shopStarterChestAnim")
+        val chestRaySpin by starterChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = 360f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 9000, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "chestRaySpin",
+        )
+        val chestGlowPulse by starterChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = 1f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 2400, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "chestGlowPulse",
+        )
+        val chestScale by starterChestAnim.animateFloat(
+          initialValue = 0.95f,
+          targetValue = 1.05f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 900, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "chestScale",
+        )
+        val chestTilt by starterChestAnim.animateFloat(
+          initialValue = -3.4f,
+          targetValue = 3.4f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1150, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "chestTilt",
+        )
+        val chestBobDp by starterChestAnim.animateFloat(
+          initialValue = -1.8f,
+          targetValue = 1.8f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 980, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "chestBob",
+        )
+        val leftCoinBobDp by starterChestAnim.animateFloat(
+          initialValue = 2.0f,
+          targetValue = -2.0f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 820, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "leftCoinBob",
+        )
+        val leftCoinTilt by starterChestAnim.animateFloat(
+          initialValue = -5.5f,
+          targetValue = 4.5f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1040, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "leftCoinTilt",
+        )
+        val rightCoinBobDp by starterChestAnim.animateFloat(
+          initialValue = -2.0f,
+          targetValue = 2.0f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 880, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "rightCoinBob",
+        )
+        val rightCoinTilt by starterChestAnim.animateFloat(
+          initialValue = 5.5f,
+          targetValue = -4.5f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "rightCoinTilt",
+        )
+        val chestSparklePhase by starterChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = (2.0 * PI).toFloat(),
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1800, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "chestSparkle",
+        )
+
+        // Rotating white sunbeam rays & warm-white core halo behind the treasure chest and coins
+        Canvas(
+          modifier =
+            Modifier
+              .fillMaxWidth()
+              .height(cardH * 0.64f)
+              .padding(horizontal = cardW * 0.024f, vertical = cardH * 0.055f)
+              .clip(RoundedCornerShape(cardH * 0.11f))
+              .testTag("shop_starter_chest_rays"),
+        ) {
+          val insetX = (cardW * 0.024f).toPx()
+          val insetY = (cardH * 0.055f).toPx()
+          val cx = chestCenterX.toPx() - insetX
+          val cy = chestCenterY.toPx() - insetY
+          val maxR = (chestW * 0.92f).toPx()
+          val haloAlpha = 0.72f + 0.24f * sin(chestGlowPulse * 2f * PI.toFloat())
+
+          drawCircle(
+            brush =
+              Brush.radialGradient(
+                colors =
+                  listOf(
+                    Color(0xF0FFFBE8).copy(alpha = haloAlpha),
+                    Color(0x99FFFFFF).copy(alpha = haloAlpha * 0.75f),
+                    Color.Transparent,
+                  ),
+                center = Offset(cx, cy),
+                radius = maxR * 0.85f,
+              ),
+            radius = maxR * 0.85f,
+            center = Offset(cx, cy),
+          )
+
+          val rayBrush =
+            Brush.radialGradient(
+              colors =
+                listOf(
+                  Color(0xE8FFFFFF),
+                  Color(0x88FFFDF4),
+                  Color(0x22FFFFFF),
+                  Color.Transparent,
+                ),
+              center = Offset(cx, cy),
+              radius = maxR,
+            )
+          rotate(degrees = chestRaySpin, pivot = Offset(cx, cy)) {
+            val rayCount = 12
+            for (i in 0 until rayCount) {
+              val a0 = (i * (360.0 / rayCount)) * (PI / 180.0)
+              val halfSpread = 0.12
+              val a1 = a0 + halfSpread
+              val a2 = a0 - halfSpread
+              val rayPath =
+                Path().apply {
+                  moveTo(cx, cy)
+                  lineTo(cx + cos(a1).toFloat() * maxR, cy + sin(a1).toFloat() * maxR)
+                  lineTo(cx + cos(a2).toFloat() * maxR, cy + sin(a2).toFloat() * maxR)
+                  close()
+                }
+              drawPath(rayPath, brush = rayBrush)
+            }
+          }
+        }
+
+        // Left flanking gold coin pile (gently bobbing & tilting)
+        Image(
+          painter = painterResource(id = R.drawable.ic_shop_starter_coin_pile),
+          contentDescription = null,
+          contentScale = ContentScale.Fit,
+          modifier =
+            Modifier
+              .offset(x = chestCenterX - chestW * 0.68f, y = cardH * 0.265f)
+              .size(width = coinPileW, height = coinPileH)
+              .graphicsLayer {
+                scaleX = -1f * (0.96f + 0.04f * chestScale)
+                scaleY = 0.96f + 0.04f * chestScale
+                rotationZ = leftCoinTilt
+                translationY = leftCoinBobDp.dp.toPx()
+              },
+        )
+
+        // Right flanking gold coin pile (gently bobbing & tilting)
+        Image(
+          painter = painterResource(id = R.drawable.ic_shop_starter_coin_pile),
+          contentDescription = null,
+          contentScale = ContentScale.Fit,
+          modifier =
+            Modifier
+              .offset(x = chestCenterX + chestW * 0.22f, y = cardH * 0.265f)
+              .size(width = coinPileW, height = coinPileH)
+              .graphicsLayer {
+                scaleX = 0.96f + 0.04f * chestScale
+                scaleY = 0.96f + 0.04f * chestScale
+                rotationZ = rightCoinTilt
+                translationY = rightCoinBobDp.dp.toPx()
+              },
+        )
+
+        // Center 2nd treasure chest sprite with smooth continuous motion & twinkling stars
+        Box(
+          modifier =
+            Modifier
+              .offset(x = chestCenterX - chestW * 0.50f, y = chestTop)
+              .size(width = chestW, height = chestH)
+              .testTag("shop_starter_animated_chest"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.ic_shop_starter_chest),
+            contentDescription = stringResource(R.string.shop_starter_chest_desc),
+            contentScale = ContentScale.Fit,
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                  scaleX = chestScale
+                  scaleY = chestScale
+                  rotationZ = chestTilt
+                  translationY = chestBobDp.dp.toPx()
+                },
+          )
+          Canvas(modifier = Modifier.fillMaxSize()) {
+            fun drawFourPointStar(cx: Float, cy: Float, radius: Float, alpha: Float) {
+              if (alpha <= 0.05f || radius <= 0.5f) return
+              val inner = radius * 0.24f
+              val starPath =
+                Path().apply {
+                  moveTo(cx, cy - radius)
+                  lineTo(cx + inner, cy - inner)
+                  lineTo(cx + radius, cy)
+                  lineTo(cx + inner, cy + inner)
+                  lineTo(cx, cy + radius)
+                  lineTo(cx - inner, cy + inner)
+                  lineTo(cx - radius, cy)
+                  lineTo(cx - inner, cy - inner)
+                  close()
+                }
+              drawPath(path = starPath, color = Color.White.copy(alpha = alpha))
+            }
+
+            val t1 = ((sin(chestSparklePhase.toDouble()) + 1.0) * 0.5).toFloat()
+            val t2 = ((sin((chestSparklePhase + 2.1f).toDouble()) + 1.0) * 0.5).toFloat()
+            val t3 = ((sin((chestSparklePhase + 4.2f).toDouble()) + 1.0) * 0.5).toFloat()
+
+            drawFourPointStar(
+              cx = size.width * -0.18f,
+              cy = size.height * 0.28f,
+              radius = size.minDimension * (0.06f + 0.05f * t1),
+              alpha = 0.25f + 0.75f * t1,
+            )
+            drawFourPointStar(
+              cx = size.width * 1.14f,
+              cy = size.height * 0.24f,
+              radius = size.minDimension * (0.06f + 0.05f * t2),
+              alpha = 0.25f + 0.75f * t2,
+            )
+            drawFourPointStar(
+              cx = size.width * 0.88f,
+              cy = size.height * 0.08f,
+              radius = size.minDimension * (0.05f + 0.05f * t3),
+              alpha = 0.25f + 0.75f * t3,
+            )
+          }
+        }
+
+        // Bold white "1000" label with crisp black outline right below the chest coins
+        val coinsLabel = stringResource(R.string.shop_starter_coins_amount)
+        val coinsLabelStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (cardH.value * 0.118f).coerceIn(15f, 24f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.3.sp,
+          )
+        val coinsBoxW = cardW * 0.22f
+        Box(
+          modifier =
+            Modifier
+              .offset(x = chestCenterX - coinsBoxW * 0.50f, y = cardH * 0.495f)
+              .width(coinsBoxW)
+              .testTag("shop_starter_coins_label"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Text(
+            text = coinsLabel,
+            style =
+              coinsLabelStyle.copy(
+                drawStyle = Stroke(width = 8.5f, join = StrokeJoin.Round),
+              ),
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.offset(y = 1.2.dp),
+          )
+          Text(
+            text = coinsLabel,
+            style =
+              coinsLabelStyle.copy(
+                drawStyle = Stroke(width = 7.0f, join = StrokeJoin.Round),
+              ),
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+          )
+          Text(
+            text = coinsLabel,
+            style = coinsLabelStyle,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+          )
+        }
 
         val trayW = cardW * 0.312f
         val trayH = cardH * 0.387f
@@ -1725,6 +2053,95 @@ fun ShopDialog(
               maxLines = 1,
               softWrap = false,
             )
+          }
+        }
+
+        val priceBtnW = cardW * 0.271f
+        val priceBtnH = cardH * 0.229f
+        val priceTouchH = maxOf(priceBtnH, 48.dp)
+        val priceBtnCenterY = cardH * 0.692f + priceBtnH * 0.50f
+        val priceBtnInteraction = remember { MutableInteractionSource() }
+        val isPricePressed by priceBtnInteraction.collectIsPressedAsState()
+        val priceBtnScale by animateFloatAsState(
+          targetValue = if (isPricePressed) 0.93f else 1f,
+          animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+          label = "starterPriceBtnScale",
+        )
+        val starterPriceText = stringResource(R.string.shop_starter_pack_price)
+        val starterPriceStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (priceBtnH.value * 0.43f).coerceIn(13f, 20f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.2.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.690f, y = priceBtnCenterY - priceTouchH * 0.50f)
+              .size(width = priceBtnW, height = priceTouchH)
+              .scale(priceBtnScale)
+              .clickable(
+                interactionSource = priceBtnInteraction,
+                indication = null,
+                onClick = onClaimFreeCoins,
+              )
+              .testTag("shop_starter_price_button"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier = Modifier.size(width = priceBtnW, height = priceBtnH),
+            contentAlignment = Alignment.Center,
+          ) {
+            Image(
+              painter = painterResource(id = R.drawable.btn_shop_price_green),
+              contentDescription = "$ribbonTitle $starterPriceText",
+              contentScale = ContentScale.FillBounds,
+              modifier = Modifier.fillMaxSize(),
+            )
+            Box(
+              modifier =
+                Modifier
+                  .fillMaxSize()
+                  .padding(horizontal = priceBtnW * 0.06f)
+                  .padding(bottom = priceBtnH * 0.06f),
+              contentAlignment = Alignment.Center,
+            ) {
+              Text(
+                text = starterPriceText,
+                style =
+                  starterPriceStyle.copy(
+                    drawStyle = Stroke(width = 7.5f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF063810),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.offset(y = 1.2.dp),
+              )
+              Text(
+                text = starterPriceText,
+                style =
+                  starterPriceStyle.copy(
+                    drawStyle = Stroke(width = 6.0f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF0A4D18),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+              Text(
+                text = starterPriceText,
+                style =
+                  starterPriceStyle.copy(
+                    shadow = Shadow(color = Color(0x88063810), offset = Offset(0f, 1.2f), blurRadius = 1.2f),
+                  ),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+            }
           }
         }
       }
@@ -2020,15 +2437,120 @@ fun ShopDialog(
             )
           }
         }
+
+        val noAdsPriceBtnW = cardW * 0.271f
+        val noAdsPriceBtnH = cardH * 0.379f
+        val noAdsPriceTouchH = maxOf(noAdsPriceBtnH, 48.dp)
+        val noAdsPriceBtnCenterY = cardH * 0.221f + noAdsPriceBtnH * 0.50f
+        val noAdsPriceInteraction = remember { MutableInteractionSource() }
+        val isNoAdsPricePressed by noAdsPriceInteraction.collectIsPressedAsState()
+        val noAdsPriceScale by animateFloatAsState(
+          targetValue = if (isNoAdsPricePressed) 0.93f else 1f,
+          animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+          label = "noAdsPriceBtnScale",
+        )
+        val noAdsPriceText = stringResource(R.string.shop_no_ads_price)
+        val noAdsPriceStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (noAdsPriceBtnH.value * 0.345f).coerceIn(11.0f, 17.5f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.690f, y = noAdsPriceBtnCenterY - noAdsPriceTouchH * 0.50f)
+              .size(width = noAdsPriceBtnW, height = noAdsPriceTouchH)
+              .scale(noAdsPriceScale)
+              .clickable(
+                interactionSource = noAdsPriceInteraction,
+                indication = null,
+                onClick = {},
+              )
+              .testTag("shop_no_ads_price_button"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier = Modifier.size(width = noAdsPriceBtnW, height = noAdsPriceBtnH),
+            contentAlignment = Alignment.Center,
+          ) {
+            Image(
+              painter = painterResource(id = R.drawable.btn_shop_price_green),
+              contentDescription = "$noAdsTitle $noAdsPriceText",
+              contentScale = ContentScale.FillBounds,
+              modifier = Modifier.fillMaxSize(),
+            )
+            Box(
+              modifier =
+                Modifier
+                  .fillMaxSize()
+                  .padding(horizontal = noAdsPriceBtnW * 0.05f)
+                  .padding(bottom = noAdsPriceBtnH * 0.06f),
+              contentAlignment = Alignment.Center,
+            ) {
+              Text(
+                text = noAdsPriceText,
+                style =
+                  noAdsPriceStyle.copy(
+                    drawStyle = Stroke(width = 7.0f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF063810),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.offset(y = 1.2.dp),
+              )
+              Text(
+                text = noAdsPriceText,
+                style =
+                  noAdsPriceStyle.copy(
+                    drawStyle = Stroke(width = 5.5f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF0A4D18),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+              Text(
+                text = noAdsPriceText,
+                style =
+                  noAdsPriceStyle.copy(
+                    shadow = Shadow(color = Color(0x88063810), offset = Offset(0f, 1.2f), blurRadius = 1.2f),
+                  ),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+            }
+          }
+        }
+
+        Text(
+          text = stringResource(R.string.shop_rewarded_ads_note),
+          style =
+            MaterialTheme.typography.labelSmall.copy(
+              fontFamily = FontFamily.SansSerif,
+              fontWeight = FontWeight.Black,
+              fontSize = (cardH.value * 0.118f).coerceIn(9.5f, 15.0f).sp,
+              letterSpacing = 0.25.sp,
+              shadow = Shadow(color = Color(0x99320F6B), offset = Offset(0f, 1.5f), blurRadius = 1.5f),
+            ),
+          color = Color.White,
+          maxLines = 1,
+          softWrap = false,
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.045f, y = cardH * 0.752f)
+              .testTag("shop_no_ads_rewarded_note"),
+        )
       }
 
       Spacer(Modifier.height(20.dp))
 
       val noAdsPackPanelInteraction = remember { MutableInteractionSource() }
-      Image(
-        painter = painterResource(id = R.drawable.panel_shop_no_ads_blue),
-        contentDescription = stringResource(R.string.shop_no_ads_pack_panel_desc),
-        contentScale = ContentScale.FillBounds,
+      BoxWithConstraints(
         modifier =
           Modifier
             .widthIn(max = 520.dp)
@@ -2041,36 +2563,1106 @@ fun ShopDialog(
               onClick = {},
             )
             .testTag("shop_no_ads_blue_panel"),
-      )
+      ) {
+        val cardW = maxWidth
+        val cardH = maxHeight
+
+        Image(
+          painter = painterResource(id = R.drawable.panel_shop_no_ads_blue),
+          contentDescription = stringResource(R.string.shop_no_ads_pack_panel_desc),
+          contentScale = ContentScale.FillBounds,
+          modifier = Modifier.fillMaxSize(),
+        )
+
+        val badgeW = cardW * 0.215f
+        val badgeH = badgeW * (123f / 124f)
+        val badgeLeft = cardW * 0.120f
+        val badgeTop = cardH * 0.084f
+        val packBadgeAnim = rememberInfiniteTransition(label = "shopNoAdsPackBadgeAnim")
+        val raySpin by packBadgeAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = 360f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 9000, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "shopNoAdsPackRays",
+        )
+        val pulsePhase by packBadgeAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = 1f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 2400, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "shopNoAdsPackGlowPulse",
+        )
+        val badgePulse by packBadgeAnim.animateFloat(
+          initialValue = 0.94f,
+          targetValue = 1.06f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 850, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "packBadgePulse",
+        )
+        val badgeTilt by packBadgeAnim.animateFloat(
+          initialValue = -5.0f,
+          targetValue = 5.0f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1300, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "packBadgeTilt",
+        )
+        val badgeBobDp by packBadgeAnim.animateFloat(
+          initialValue = -1.5f,
+          targetValue = 1.5f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1050, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "packBadgeBob",
+        )
+        val sparklePhase by packBadgeAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = (2.0 * PI).toFloat(),
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1800, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "packBadgeSparkle",
+        )
+
+        // Rotating white sunbeam rays + radiant halo strictly behind the sky-blue ADS badge
+        Canvas(
+          modifier =
+            Modifier
+              .fillMaxSize()
+              .padding(horizontal = cardW * 0.024f, vertical = cardH * 0.046f)
+              .clip(RoundedCornerShape(cardH * 0.075f))
+              .testTag("shop_no_ads_pack_rotating_rays"),
+        ) {
+          val insetX = (cardW * 0.024f).toPx()
+          val insetY = (cardH * 0.046f).toPx()
+          val cx = (badgeLeft + badgeW * 0.5f).toPx() - insetX
+          val cy = (badgeTop + badgeH * 0.5f).toPx() - insetY
+          val maxR = (badgeW * 0.98f).toPx()
+          val haloAlpha = 0.72f + 0.24f * sin(pulsePhase * 2f * PI.toFloat())
+
+          drawCircle(
+            brush =
+              Brush.radialGradient(
+                colors =
+                  listOf(
+                    Color(0xF0FFF8E6).copy(alpha = haloAlpha),
+                    Color(0x99FFFFFF).copy(alpha = haloAlpha * 0.75f),
+                    Color.Transparent,
+                  ),
+                center = Offset(cx, cy),
+                radius = maxR * 0.82f,
+              ),
+            radius = maxR * 0.82f,
+            center = Offset(cx, cy),
+          )
+
+          val rayBrush =
+            Brush.radialGradient(
+              colors =
+                listOf(
+                  Color(0xE8FFFFFF),
+                  Color(0x88EBF8FF),
+                  Color(0x22FFFFFF),
+                  Color.Transparent,
+                ),
+              center = Offset(cx, cy),
+              radius = maxR,
+            )
+          rotate(degrees = raySpin, pivot = Offset(cx, cy)) {
+            val rayCount = 12
+            for (i in 0 until rayCount) {
+              val a0 = (i * (360.0 / rayCount)) * (PI / 180.0)
+              val halfSpread = 0.12
+              val a1 = a0 + halfSpread
+              val a2 = a0 - halfSpread
+              val rayPath =
+                Path().apply {
+                  moveTo(cx, cy)
+                  lineTo(cx + cos(a1).toFloat() * maxR, cy + sin(a1).toFloat() * maxR)
+                  lineTo(cx + cos(a2).toFloat() * maxR, cy + sin(a2).toFloat() * maxR)
+                  close()
+                }
+              drawPath(rayPath, brush = rayBrush)
+            }
+          }
+        }
+
+        Box(
+          modifier =
+            Modifier
+              .offset(x = badgeLeft, y = badgeTop)
+              .size(width = badgeW, height = badgeH)
+              .testTag("shop_no_ads_pack_animated_badge"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.ic_shop_no_ads_blue),
+            contentDescription = stringResource(R.string.shop_no_ads_icon_desc),
+            contentScale = ContentScale.Fit,
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                  scaleX = badgePulse
+                  scaleY = badgePulse
+                  rotationZ = badgeTilt
+                  translationY = badgeBobDp.dp.toPx()
+                },
+          )
+          Canvas(modifier = Modifier.fillMaxSize()) {
+            fun drawFourPointStar(cx: Float, cy: Float, radius: Float, alpha: Float) {
+              if (alpha <= 0.05f || radius <= 0.5f) return
+              val inner = radius * 0.24f
+              val starPath =
+                Path().apply {
+                  moveTo(cx, cy - radius)
+                  lineTo(cx + inner, cy - inner)
+                  lineTo(cx + radius, cy)
+                  lineTo(cx + inner, cy + inner)
+                  lineTo(cx, cy + radius)
+                  lineTo(cx - inner, cy + inner)
+                  lineTo(cx - radius, cy)
+                  lineTo(cx - inner, cy - inner)
+                  close()
+                }
+              drawPath(path = starPath, color = Color.White.copy(alpha = alpha))
+            }
+
+            val t1 = ((sin(sparklePhase.toDouble()) + 1.0) * 0.5).toFloat()
+            val t2 = ((sin((sparklePhase + 2.1f).toDouble()) + 1.0) * 0.5).toFloat()
+            val t3 = ((sin((sparklePhase + 4.2f).toDouble()) + 1.0) * 0.5).toFloat()
+
+            drawFourPointStar(
+              cx = size.width * 0.02f,
+              cy = size.height * 0.16f,
+              radius = size.minDimension * (0.08f + 0.07f * t1),
+              alpha = 0.25f + 0.75f * t1,
+            )
+            drawFourPointStar(
+              cx = size.width * 0.96f,
+              cy = size.height * 0.14f,
+              radius = size.minDimension * (0.07f + 0.06f * t2),
+              alpha = 0.25f + 0.75f * t2,
+            )
+            drawFourPointStar(
+              cx = size.width * 0.96f,
+              cy = size.height * 0.87f,
+              radius = size.minDimension * (0.08f + 0.07f * t3),
+              alpha = 0.25f + 0.75f * t3,
+            )
+          }
+        }
+
+        val packTrayW = cardW * 0.417f
+        val packTrayH = cardH * 0.383f
+        val packQtyOne = stringResource(R.string.shop_booster_qty_one)
+        val packCoinsAmt = stringResource(R.string.shop_starter_coins_amount)
+        val packQtyStyle =
+          MaterialTheme.typography.labelLarge.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (packTrayH.value * 0.225f).coerceIn(10.5f, 16f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.2.sp,
+          )
+        val packCoinsLabelStyle =
+          MaterialTheme.typography.labelLarge.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (packTrayH.value * 0.195f).coerceIn(9.5f, 14f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.477f, y = cardH * 0.092f)
+              .size(width = packTrayW, height = packTrayH)
+              .testTag("shop_no_ads_pack_tray"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.panel_shop_no_ads_pack_tray),
+            contentDescription = stringResource(R.string.shop_no_ads_pack_tray_desc),
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+          )
+          Row(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(horizontal = packTrayW * 0.042f, vertical = packTrayH * 0.07f),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            val packItems =
+              listOf(
+                Triple(R.drawable.ic_shop_pack_vip, R.string.shop_booster_vip_desc, packQtyOne),
+                Triple(R.drawable.ic_shop_pack_bus, R.string.shop_booster_bus_desc, packQtyOne),
+                Triple(R.drawable.ic_shop_pack_refresh, R.string.shop_booster_refresh_desc, packQtyOne),
+                Triple(R.drawable.ic_shop_pack_coins, R.string.shop_pack_coins_desc, packCoinsAmt),
+              )
+            packItems.forEachIndexed { index, (iconRes, descRes, label) ->
+              val isCoinsItem = index == 3
+              val itemLabelStyle = if (isCoinsItem) packCoinsLabelStyle else packQtyStyle
+              Box(
+                modifier = Modifier.weight(if (isCoinsItem) 1.18f else 1f).fillMaxSize(),
+                contentAlignment = Alignment.TopCenter,
+              ) {
+                Image(
+                  painter = painterResource(id = iconRes),
+                  contentDescription = stringResource(descRes),
+                  contentScale = ContentScale.Fit,
+                  modifier =
+                    Modifier
+                      .fillMaxWidth(0.92f)
+                      .height(packTrayH * 0.64f)
+                      .padding(top = packTrayH * 0.02f),
+                )
+                Box(
+                  modifier =
+                    Modifier
+                      .align(Alignment.BottomCenter)
+                      .padding(bottom = packTrayH * 0.01f),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Text(
+                    text = label,
+                    style =
+                      itemLabelStyle.copy(
+                        drawStyle = Stroke(width = 5.5f, join = StrokeJoin.Round),
+                      ),
+                    color = Color.Black,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.offset(y = 0.8.dp),
+                  )
+                  Text(
+                    text = label,
+                    style =
+                      itemLabelStyle.copy(
+                        drawStyle = Stroke(width = 4.5f, join = StrokeJoin.Round),
+                      ),
+                    color = Color.Black,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                  Text(
+                    text = label,
+                    style = itemLabelStyle,
+                    color = Color.White,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                }
+              }
+            }
+          }
+        }
+
+        val packRibbonW = cardW * 0.592f
+        val packRibbonH = cardH * 0.312f
+        val packRibbonTitle = stringResource(R.string.shop_no_ads_pack_title)
+        val packRibbonTextStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (packRibbonH.value * 0.49f).coerceIn(16f, 27f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.3.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.032f, y = cardH * 0.531f)
+              .size(width = packRibbonW, height = packRibbonH)
+              .testTag("shop_no_ads_pack_ribbon"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.ribbon_shop_no_ads_blue),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+          )
+          Box(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(horizontal = packRibbonW * 0.14f)
+                .padding(bottom = packRibbonH * 0.14f),
+            contentAlignment = Alignment.Center,
+          ) {
+            Text(
+              text = packRibbonTitle,
+              style =
+                packRibbonTextStyle.copy(
+                  drawStyle = Stroke(width = 9f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF002B7A),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+              modifier = Modifier.offset(y = 1.8.dp),
+            )
+            Text(
+              text = packRibbonTitle,
+              style =
+                packRibbonTextStyle.copy(
+                  drawStyle = Stroke(width = 7.5f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF003B9E),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+            Text(
+              text = packRibbonTitle,
+              style =
+                packRibbonTextStyle.copy(
+                  shadow = Shadow(color = Color(0x9900256E), offset = Offset(0f, 1.5f), blurRadius = 1.5f),
+                ),
+              color = Color.White,
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+          }
+        }
+
+        val packPriceBtnW = cardW * 0.273f
+        val packPriceBtnH = cardH * 0.220f
+        val packPriceTouchH = maxOf(packPriceBtnH, 48.dp)
+        val packPriceBtnCenterY = cardH * 0.583f + packPriceBtnH * 0.50f
+        val packPriceInteraction = remember { MutableInteractionSource() }
+        val isPackPricePressed by packPriceInteraction.collectIsPressedAsState()
+        val packPriceScale by animateFloatAsState(
+          targetValue = if (isPackPricePressed) 0.93f else 1f,
+          animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+          label = "noAdsPackPriceBtnScale",
+        )
+        val packPriceText = stringResource(R.string.shop_no_ads_pack_price)
+        val packPriceStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (packPriceBtnH.value * 0.345f).coerceIn(11.0f, 17.5f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.690f, y = packPriceBtnCenterY - packPriceTouchH * 0.50f)
+              .size(width = packPriceBtnW, height = packPriceTouchH)
+              .scale(packPriceScale)
+              .clickable(
+                interactionSource = packPriceInteraction,
+                indication = null,
+                onClick = {},
+              )
+              .testTag("shop_no_ads_pack_price_button"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier = Modifier.size(width = packPriceBtnW, height = packPriceBtnH),
+            contentAlignment = Alignment.Center,
+          ) {
+            Image(
+              painter = painterResource(id = R.drawable.btn_shop_price_green),
+              contentDescription = "$packRibbonTitle $packPriceText",
+              contentScale = ContentScale.FillBounds,
+              modifier = Modifier.fillMaxSize(),
+            )
+            Box(
+              modifier =
+                Modifier
+                  .fillMaxSize()
+                  .padding(horizontal = packPriceBtnW * 0.05f)
+                  .padding(bottom = packPriceBtnH * 0.06f),
+              contentAlignment = Alignment.Center,
+            ) {
+              Text(
+                text = packPriceText,
+                style =
+                  packPriceStyle.copy(
+                    drawStyle = Stroke(width = 7.0f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF063810),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.offset(y = 1.2.dp),
+              )
+              Text(
+                text = packPriceText,
+                style =
+                  packPriceStyle.copy(
+                    drawStyle = Stroke(width = 5.5f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF0A4D18),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+              Text(
+                text = packPriceText,
+                style =
+                  packPriceStyle.copy(
+                    shadow = Shadow(color = Color(0x88063810), offset = Offset(0f, 1.2f), blurRadius = 1.2f),
+                  ),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+            }
+          }
+        }
+
+        Text(
+          text = stringResource(R.string.shop_rewarded_ads_note),
+          style =
+            MaterialTheme.typography.labelSmall.copy(
+              fontFamily = FontFamily.SansSerif,
+              fontWeight = FontWeight.Black,
+              fontSize = (cardW.value * 0.036f).coerceIn(9.5f, 15.0f).sp,
+              letterSpacing = 0.25.sp,
+              shadow = Shadow(color = Color(0x9900256E), offset = Offset(0f, 1.5f), blurRadius = 1.5f),
+            ),
+          color = Color.White,
+          textAlign = TextAlign.Center,
+          maxLines = 1,
+          softWrap = false,
+          modifier =
+            Modifier
+              .align(Alignment.BottomCenter)
+              .padding(bottom = cardH * 0.044f)
+              .testTag("shop_no_ads_pack_rewarded_note"),
+        )
+      }
 
       Spacer(Modifier.height(20.dp))
 
       val smallPackPanelInteraction = remember { MutableInteractionSource() }
-      Image(
-        painter = painterResource(id = R.drawable.panel_shop_no_ads_blue),
-        contentDescription = stringResource(R.string.shop_small_pack_panel_desc),
-        contentScale = ContentScale.FillBounds,
+      BoxWithConstraints(
         modifier =
           Modifier
             .widthIn(max = 520.dp)
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .aspectRatio(642f / 318f)
+            .aspectRatio(642f / 313f)
             .clickable(
               interactionSource = smallPackPanelInteraction,
               indication = null,
               onClick = {},
             )
             .testTag("shop_small_pack_blue_panel"),
-      )
+      ) {
+        val cardW = maxWidth
+        val cardH = maxHeight
+
+        Image(
+          painter = painterResource(id = R.drawable.panel_shop_small_pack_blue),
+          contentDescription = stringResource(R.string.shop_small_pack_panel_desc),
+          contentScale = ContentScale.FillBounds,
+          modifier = Modifier.fillMaxSize(),
+        )
+
+        val smallChestW = cardW * 0.268f
+        val smallChestH = smallChestW * (256f / 284f)
+        val smallChestCenterX = cardW * 0.328f
+        val smallChestTop = cardH * 0.068f
+        val smallChestCenterY = smallChestTop + smallChestH * 0.50f
+        val smallCoinPileW = cardW * 0.132f
+        val smallCoinPileH = smallCoinPileW * (194f / 146f)
+        val smallChestAnim = rememberInfiniteTransition(label = "smallPackChestAnim")
+        val smallRaySpin by smallChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = 360f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 9000, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "smallChestRaySpin",
+        )
+        val smallGlowPulse by smallChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = 1f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 2400, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "smallChestGlowPulse",
+        )
+        val smallChestScale by smallChestAnim.animateFloat(
+          initialValue = 0.95f,
+          targetValue = 1.05f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 900, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "smallChestScale",
+        )
+        val smallChestTilt by smallChestAnim.animateFloat(
+          initialValue = -3.0f,
+          targetValue = 3.0f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1150, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "smallChestTilt",
+        )
+        val smallChestBobDp by smallChestAnim.animateFloat(
+          initialValue = -1.8f,
+          targetValue = 1.8f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 980, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "smallChestBob",
+        )
+        val smallLeftCoinBobDp by smallChestAnim.animateFloat(
+          initialValue = 2.0f,
+          targetValue = -2.0f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 820, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "smallLeftCoinBob",
+        )
+        val smallLeftCoinTilt by smallChestAnim.animateFloat(
+          initialValue = -5.5f,
+          targetValue = 4.5f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1040, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "smallLeftCoinTilt",
+        )
+        val smallRightCoinBobDp by smallChestAnim.animateFloat(
+          initialValue = -2.0f,
+          targetValue = 2.0f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 880, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "smallRightCoinBob",
+        )
+        val smallRightCoinTilt by smallChestAnim.animateFloat(
+          initialValue = 5.5f,
+          targetValue = -4.5f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "smallRightCoinTilt",
+        )
+        val smallSparklePhase by smallChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = (2.0 * PI).toFloat(),
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1800, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "smallChestSparkle",
+        )
+
+        // Rotating white sunbeam rays & radiant white core halo behind the blue 5000 chest and flanking coins
+        Canvas(
+          modifier =
+            Modifier
+              .fillMaxWidth()
+              .height(cardH * 0.65f)
+              .padding(horizontal = cardW * 0.024f, vertical = cardH * 0.055f)
+              .clip(RoundedCornerShape(cardH * 0.11f))
+              .testTag("shop_small_pack_chest_rays"),
+        ) {
+          val insetX = (cardW * 0.024f).toPx()
+          val insetY = (cardH * 0.055f).toPx()
+          val cx = smallChestCenterX.toPx() - insetX
+          val cy = smallChestCenterY.toPx() - insetY
+          val maxR = (smallChestW * 0.92f).toPx()
+          val haloAlpha = 0.72f + 0.24f * sin(smallGlowPulse * 2f * PI.toFloat())
+
+          drawCircle(
+            brush =
+              Brush.radialGradient(
+                colors =
+                  listOf(
+                    Color(0xF0FFFBE8).copy(alpha = haloAlpha),
+                    Color(0x99FFFFFF).copy(alpha = haloAlpha * 0.75f),
+                    Color.Transparent,
+                  ),
+                center = Offset(cx, cy),
+                radius = maxR * 0.85f,
+              ),
+            radius = maxR * 0.85f,
+            center = Offset(cx, cy),
+          )
+
+          val rayBrush =
+            Brush.radialGradient(
+              colors =
+                listOf(
+                  Color(0xE8FFFFFF),
+                  Color(0x88EBF8FF),
+                  Color(0x22FFFFFF),
+                  Color.Transparent,
+                ),
+              center = Offset(cx, cy),
+              radius = maxR,
+            )
+          rotate(degrees = smallRaySpin, pivot = Offset(cx, cy)) {
+            val rayCount = 12
+            for (i in 0 until rayCount) {
+              val a0 = (i * (360.0 / rayCount)) * (PI / 180.0)
+              val halfSpread = 0.12
+              val a1 = a0 + halfSpread
+              val a2 = a0 - halfSpread
+              val rayPath =
+                Path().apply {
+                  moveTo(cx, cy)
+                  lineTo(cx + cos(a1).toFloat() * maxR, cy + sin(a1).toFloat() * maxR)
+                  lineTo(cx + cos(a2).toFloat() * maxR, cy + sin(a2).toFloat() * maxR)
+                  close()
+                }
+              drawPath(rayPath, brush = rayBrush)
+            }
+          }
+        }
+
+        // Left flanking crisp gold coin pile (gently bobbing & tilting)
+        Image(
+          painter = painterResource(id = R.drawable.ic_shop_starter_coin_pile),
+          contentDescription = null,
+          contentScale = ContentScale.Fit,
+          modifier =
+            Modifier
+              .offset(x = smallChestCenterX - smallChestW * 0.70f, y = cardH * 0.248f)
+              .size(width = smallCoinPileW, height = smallCoinPileH)
+              .graphicsLayer {
+                scaleX = -1f * (0.96f + 0.04f * smallChestScale)
+                scaleY = 0.96f + 0.04f * smallChestScale
+                rotationZ = smallLeftCoinTilt
+                translationY = smallLeftCoinBobDp.dp.toPx()
+              },
+        )
+
+        // Right flanking crisp gold coin pile (gently bobbing & tilting)
+        Image(
+          painter = painterResource(id = R.drawable.ic_shop_starter_coin_pile),
+          contentDescription = null,
+          contentScale = ContentScale.Fit,
+          modifier =
+            Modifier
+              .offset(x = smallChestCenterX + smallChestW * 0.21f, y = cardH * 0.248f)
+              .size(width = smallCoinPileW, height = smallCoinPileH)
+              .graphicsLayer {
+                scaleX = 0.96f + 0.04f * smallChestScale
+                scaleY = 0.96f + 0.04f * smallChestScale
+                rotationZ = smallRightCoinTilt
+                translationY = smallRightCoinBobDp.dp.toPx()
+              },
+        )
+
+        // Center blue treasure chest with smooth continuous motion & twinkling stars
+        Box(
+          modifier =
+            Modifier
+              .offset(x = smallChestCenterX - smallChestW * 0.50f, y = smallChestTop)
+              .size(width = smallChestW, height = smallChestH)
+              .testTag("shop_small_pack_animated_chest"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.ic_shop_small_pack_chest_clean),
+            contentDescription = stringResource(R.string.shop_small_pack_chest_desc),
+            contentScale = ContentScale.Fit,
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                  scaleX = smallChestScale
+                  scaleY = smallChestScale
+                  rotationZ = smallChestTilt
+                  translationY = smallChestBobDp.dp.toPx()
+                },
+          )
+          Canvas(modifier = Modifier.fillMaxSize()) {
+            fun drawFourPointStar(cx: Float, cy: Float, radius: Float, alpha: Float) {
+              if (alpha <= 0.05f || radius <= 0.5f) return
+              val inner = radius * 0.24f
+              val starPath =
+                Path().apply {
+                  moveTo(cx, cy - radius)
+                  lineTo(cx + inner, cy - inner)
+                  lineTo(cx + radius, cy)
+                  lineTo(cx + inner, cy + inner)
+                  lineTo(cx, cy + radius)
+                  lineTo(cx - inner, cy + inner)
+                  lineTo(cx - radius, cy)
+                  lineTo(cx - inner, cy - inner)
+                  close()
+                }
+              drawPath(path = starPath, color = Color.White.copy(alpha = alpha))
+            }
+
+            val t1 = ((sin(smallSparklePhase.toDouble()) + 1.0) * 0.5).toFloat()
+            val t2 = ((sin((smallSparklePhase + 2.1f).toDouble()) + 1.0) * 0.5).toFloat()
+            val t3 = ((sin((smallSparklePhase + 4.2f).toDouble()) + 1.0) * 0.5).toFloat()
+
+            drawFourPointStar(
+              cx = size.width * -0.18f,
+              cy = size.height * 0.28f,
+              radius = size.minDimension * (0.06f + 0.05f * t1),
+              alpha = 0.25f + 0.75f * t1,
+            )
+            drawFourPointStar(
+              cx = size.width * 1.14f,
+              cy = size.height * 0.24f,
+              radius = size.minDimension * (0.06f + 0.05f * t2),
+              alpha = 0.25f + 0.75f * t2,
+            )
+            drawFourPointStar(
+              cx = size.width * 0.88f,
+              cy = size.height * 0.08f,
+              radius = size.minDimension * (0.05f + 0.05f * t3),
+              alpha = 0.25f + 0.75f * t3,
+            )
+          }
+        }
+
+        // Bold crisp white "5000" label with sharp black outline right below the chest coins
+        val smallCoinsLabel = stringResource(R.string.shop_small_pack_coins_amount)
+        val smallCoinsLabelStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (cardH.value * 0.122f).coerceIn(15f, 24f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.3.sp,
+          )
+        val smallCoinsBoxW = cardW * 0.25f
+        Box(
+          modifier =
+            Modifier
+              .offset(x = smallChestCenterX - smallCoinsBoxW * 0.50f, y = cardH * 0.492f)
+              .width(smallCoinsBoxW)
+              .testTag("shop_small_pack_coins_label"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Text(
+            text = smallCoinsLabel,
+            style =
+              smallCoinsLabelStyle.copy(
+                drawStyle = Stroke(width = 8.5f, join = StrokeJoin.Round),
+              ),
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.offset(y = 1.2.dp),
+          )
+          Text(
+            text = smallCoinsLabel,
+            style =
+              smallCoinsLabelStyle.copy(
+                drawStyle = Stroke(width = 7.0f, join = StrokeJoin.Round),
+              ),
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+          )
+          Text(
+            text = smallCoinsLabel,
+            style = smallCoinsLabelStyle,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+          )
+        }
+
+        val smallRibbonW = cardW * 0.576f
+        val smallRibbonH = cardH * 0.308f
+        val smallRibbonTitle = stringResource(R.string.shop_small_pack_title)
+        val smallRibbonTextStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (smallRibbonH.value * 0.49f).coerceIn(16f, 27f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.3.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.018f, y = cardH * 0.664f)
+              .size(width = smallRibbonW, height = smallRibbonH)
+              .testTag("shop_small_pack_ribbon"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.ribbon_shop_no_ads_blue),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+          )
+          Box(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(horizontal = smallRibbonW * 0.14f)
+                .padding(bottom = smallRibbonH * 0.14f),
+            contentAlignment = Alignment.Center,
+          ) {
+            Text(
+              text = smallRibbonTitle,
+              style =
+                smallRibbonTextStyle.copy(
+                  drawStyle = Stroke(width = 9f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF002B7A),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+              modifier = Modifier.offset(y = 1.8.dp),
+            )
+            Text(
+              text = smallRibbonTitle,
+              style =
+                smallRibbonTextStyle.copy(
+                  drawStyle = Stroke(width = 7.5f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF003B9E),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+            Text(
+              text = smallRibbonTitle,
+              style =
+                smallRibbonTextStyle.copy(
+                  shadow = Shadow(color = Color(0x9900256E), offset = Offset(0f, 1.5f), blurRadius = 1.5f),
+                ),
+              color = Color.White,
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+          }
+        }
+
+        val smallPriceBtnW = cardW * 0.273f
+        val smallPriceBtnH = cardH * 0.224f
+        val smallPriceTouchH = maxOf(smallPriceBtnH, 48.dp)
+        val smallPriceBtnCenterY = cardH * 0.693f + smallPriceBtnH * 0.50f
+        val smallPriceInteraction = remember { MutableInteractionSource() }
+        val isSmallPricePressed by smallPriceInteraction.collectIsPressedAsState()
+        val smallPriceScale by animateFloatAsState(
+          targetValue = if (isSmallPricePressed) 0.93f else 1f,
+          animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+          label = "smallPackPriceBtnScale",
+        )
+        val smallPriceText = stringResource(R.string.shop_small_pack_price)
+        val smallPriceStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (smallPriceBtnH.value * 0.345f).coerceIn(11.0f, 17.5f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.690f, y = smallPriceBtnCenterY - smallPriceTouchH * 0.50f)
+              .size(width = smallPriceBtnW, height = smallPriceTouchH)
+              .scale(smallPriceScale)
+              .clickable(
+                interactionSource = smallPriceInteraction,
+                indication = null,
+                onClick = {},
+              )
+              .testTag("shop_small_pack_price_button"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier = Modifier.size(width = smallPriceBtnW, height = smallPriceBtnH),
+            contentAlignment = Alignment.Center,
+          ) {
+            Image(
+              painter = painterResource(id = R.drawable.btn_shop_price_green),
+              contentDescription = "$smallRibbonTitle $smallPriceText",
+              contentScale = ContentScale.FillBounds,
+              modifier = Modifier.fillMaxSize(),
+            )
+            Box(
+              modifier =
+                Modifier
+                  .fillMaxSize()
+                  .padding(horizontal = smallPriceBtnW * 0.05f)
+                  .padding(bottom = smallPriceBtnH * 0.06f),
+              contentAlignment = Alignment.Center,
+            ) {
+              Text(
+                text = smallPriceText,
+                style =
+                  smallPriceStyle.copy(
+                    drawStyle = Stroke(width = 7.0f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF063810),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.offset(y = 1.2.dp),
+              )
+              Text(
+                text = smallPriceText,
+                style =
+                  smallPriceStyle.copy(
+                    drawStyle = Stroke(width = 5.5f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF0A4D18),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+              Text(
+                text = smallPriceText,
+                style =
+                  smallPriceStyle.copy(
+                    shadow = Shadow(color = Color(0x88063810), offset = Offset(0f, 1.2f), blurRadius = 1.2f),
+                  ),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+            }
+          }
+        }
+
+        val smallTrayW = cardW * 0.285f
+        val smallTrayH = cardH * 0.390f
+        val smallQtyOne = stringResource(R.string.shop_booster_qty_one)
+        val smallQtyStyle =
+          MaterialTheme.typography.labelLarge.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (smallTrayH.value * 0.225f).coerceIn(10.5f, 16.5f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.2.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.630f, y = cardH * 0.176f)
+              .size(width = smallTrayW, height = smallTrayH)
+              .testTag("shop_small_pack_booster_tray"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.panel_shop_small_pack_tray),
+            contentDescription = stringResource(R.string.shop_small_pack_tray_desc),
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+          )
+          Row(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(horizontal = smallTrayW * 0.065f, vertical = smallTrayH * 0.085f),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            val smallBoosters =
+              listOf(
+                Pair(R.drawable.ic_shop_booster_vip, R.string.shop_booster_vip_desc),
+                Pair(R.drawable.ic_shop_booster_bus, R.string.shop_booster_bus_desc),
+                Pair(R.drawable.ic_shop_booster_refresh, R.string.shop_booster_refresh_desc),
+              )
+            smallBoosters.forEach { (iconRes, descRes) ->
+              Box(
+                modifier = Modifier.weight(1f).fillMaxSize(),
+                contentAlignment = Alignment.TopCenter,
+              ) {
+                Image(
+                  painter = painterResource(id = iconRes),
+                  contentDescription = stringResource(descRes),
+                  contentScale = ContentScale.Fit,
+                  modifier =
+                    Modifier
+                      .fillMaxWidth(0.92f)
+                      .height(smallTrayH * 0.62f)
+                      .padding(top = smallTrayH * 0.02f),
+                )
+                Box(
+                  modifier =
+                    Modifier
+                      .align(Alignment.BottomCenter)
+                      .padding(bottom = smallTrayH * 0.01f),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Text(
+                    text = smallQtyOne,
+                    style =
+                      smallQtyStyle.copy(
+                        drawStyle = Stroke(width = 5.5f, join = StrokeJoin.Round),
+                      ),
+                    color = Color.Black,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.offset(y = 0.8.dp),
+                  )
+                  Text(
+                    text = smallQtyOne,
+                    style =
+                      smallQtyStyle.copy(
+                        drawStyle = Stroke(width = 4.5f, join = StrokeJoin.Round),
+                      ),
+                    color = Color.Black,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                  Text(
+                    text = smallQtyOne,
+                    style = smallQtyStyle,
+                    color = Color.White,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
 
       Spacer(Modifier.height(20.dp))
 
       val specialPackPanelInteraction = remember { MutableInteractionSource() }
-      Image(
-        painter = painterResource(id = R.drawable.panel_shop_special_purple),
-        contentDescription = stringResource(R.string.shop_special_pack_panel_desc),
-        contentScale = ContentScale.Fit,
+      BoxWithConstraints(
         modifier =
           Modifier
             .widthIn(max = 520.dp)
@@ -2083,15 +3675,274 @@ fun ShopDialog(
               onClick = {},
             )
             .testTag("shop_special_pack_purple_panel"),
-      )
+      ) {
+        val cardW = maxWidth
+        val cardH = maxHeight
+
+        Image(
+          painter = painterResource(id = R.drawable.panel_shop_special_purple),
+          contentDescription = stringResource(R.string.shop_special_pack_panel_desc),
+          contentScale = ContentScale.FillBounds,
+          modifier = Modifier.fillMaxSize(),
+        )
+
+        val specialRibbonW = cardW * 0.525f
+        val specialRibbonH = cardH * 0.238f
+        val specialRibbonTitle = stringResource(R.string.shop_special_pack_title)
+        val specialRibbonTextStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (specialRibbonH.value * 0.48f).coerceIn(13.5f, 22f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.25.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.045f, y = cardH * 0.696f)
+              .size(width = specialRibbonW, height = specialRibbonH)
+              .testTag("shop_special_pack_ribbon"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.ribbon_shop_no_ads_purple),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+          )
+          Box(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(horizontal = specialRibbonW * 0.14f)
+                .padding(bottom = specialRibbonH * 0.14f),
+            contentAlignment = Alignment.Center,
+          ) {
+            Text(
+              text = specialRibbonTitle,
+              style =
+                specialRibbonTextStyle.copy(
+                  drawStyle = Stroke(width = 7.5f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF47117A),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+              modifier = Modifier.offset(y = 1.5.dp),
+            )
+            Text(
+              text = specialRibbonTitle,
+              style =
+                specialRibbonTextStyle.copy(
+                  drawStyle = Stroke(width = 6.0f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF531888),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+            Text(
+              text = specialRibbonTitle,
+              style =
+                specialRibbonTextStyle.copy(
+                  shadow = Shadow(color = Color(0x993E0A72), offset = Offset(0f, 1.5f), blurRadius = 1.5f),
+                ),
+              color = Color.White,
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+          }
+        }
+
+        val specialPriceBtnW = cardW * 0.272f
+        val specialPriceBtnH = cardH * 0.200f
+        val specialPriceTouchH = maxOf(specialPriceBtnH, 48.dp)
+        val specialPriceBtnCenterY = cardH * 0.718f + specialPriceBtnH * 0.50f
+        val specialPriceInteraction = remember { MutableInteractionSource() }
+        val isSpecialPricePressed by specialPriceInteraction.collectIsPressedAsState()
+        val specialPriceScale by animateFloatAsState(
+          targetValue = if (isSpecialPricePressed) 0.93f else 1f,
+          animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+          label = "specialPackPriceBtnScale",
+        )
+        val specialPriceText = stringResource(R.string.shop_special_pack_price)
+        val specialPriceStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (specialPriceBtnH.value * 0.345f).coerceIn(11.0f, 17.5f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.690f, y = specialPriceBtnCenterY - specialPriceTouchH * 0.50f)
+              .size(width = specialPriceBtnW, height = specialPriceTouchH)
+              .scale(specialPriceScale)
+              .clickable(
+                interactionSource = specialPriceInteraction,
+                indication = null,
+                onClick = {},
+              )
+              .testTag("shop_special_pack_price_button"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier = Modifier.size(width = specialPriceBtnW, height = specialPriceBtnH),
+            contentAlignment = Alignment.Center,
+          ) {
+            Image(
+              painter = painterResource(id = R.drawable.btn_shop_price_green),
+              contentDescription = "$specialRibbonTitle $specialPriceText",
+              contentScale = ContentScale.FillBounds,
+              modifier = Modifier.fillMaxSize(),
+            )
+            Box(
+              modifier =
+                Modifier
+                  .fillMaxSize()
+                  .padding(horizontal = specialPriceBtnW * 0.05f)
+                  .padding(bottom = specialPriceBtnH * 0.06f),
+              contentAlignment = Alignment.Center,
+            ) {
+              Text(
+                text = specialPriceText,
+                style =
+                  specialPriceStyle.copy(
+                    drawStyle = Stroke(width = 7.0f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF063810),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.offset(y = 1.2.dp),
+              )
+              Text(
+                text = specialPriceText,
+                style =
+                  specialPriceStyle.copy(
+                    drawStyle = Stroke(width = 5.5f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF0A4D18),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+              Text(
+                text = specialPriceText,
+                style =
+                  specialPriceStyle.copy(
+                    shadow = Shadow(color = Color(0x88063810), offset = Offset(0f, 1.2f), blurRadius = 1.2f),
+                  ),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+            }
+          }
+        }
+
+        val specialTrayW = cardW * 0.288f
+        val specialTrayH = cardH * 0.370f
+        val specialQtyThree = stringResource(R.string.shop_booster_qty_three)
+        val specialQtyStyle =
+          MaterialTheme.typography.labelLarge.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (specialTrayH.value * 0.225f).coerceIn(10.5f, 16.5f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.2.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.628f, y = cardH * 0.191f)
+              .size(width = specialTrayW, height = specialTrayH)
+              .testTag("shop_special_pack_booster_tray"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.panel_shop_special_pack_tray),
+            contentDescription = stringResource(R.string.shop_special_pack_tray_desc),
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+          )
+          Row(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(horizontal = specialTrayW * 0.065f, vertical = specialTrayH * 0.085f),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            val specialBoosters =
+              listOf(
+                Pair(R.drawable.ic_shop_booster_vip, R.string.shop_booster_vip_desc),
+                Pair(R.drawable.ic_shop_booster_bus, R.string.shop_booster_bus_desc),
+                Pair(R.drawable.ic_shop_booster_refresh, R.string.shop_booster_refresh_desc),
+              )
+            specialBoosters.forEach { (iconRes, descRes) ->
+              Box(
+                modifier = Modifier.weight(1f).fillMaxSize(),
+                contentAlignment = Alignment.TopCenter,
+              ) {
+                Image(
+                  painter = painterResource(id = iconRes),
+                  contentDescription = stringResource(descRes),
+                  contentScale = ContentScale.Fit,
+                  modifier =
+                    Modifier
+                      .fillMaxWidth(0.92f)
+                      .height(specialTrayH * 0.62f)
+                      .padding(top = specialTrayH * 0.02f),
+                )
+                Box(
+                  modifier =
+                    Modifier
+                      .align(Alignment.BottomCenter)
+                      .padding(bottom = specialTrayH * 0.01f),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Text(
+                    text = specialQtyThree,
+                    style =
+                      specialQtyStyle.copy(
+                        drawStyle = Stroke(width = 5.5f, join = StrokeJoin.Round),
+                      ),
+                    color = Color.Black,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.offset(y = 0.8.dp),
+                  )
+                  Text(
+                    text = specialQtyThree,
+                    style =
+                      specialQtyStyle.copy(
+                        drawStyle = Stroke(width = 4.5f, join = StrokeJoin.Round),
+                      ),
+                    color = Color.Black,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                  Text(
+                    text = specialQtyThree,
+                    style = specialQtyStyle,
+                    color = Color.White,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
 
       Spacer(Modifier.height(20.dp))
 
       val largePackPanelInteraction = remember { MutableInteractionSource() }
-      Image(
-        painter = painterResource(id = R.drawable.panel_shop_large_orange_red),
-        contentDescription = stringResource(R.string.shop_large_pack_panel_desc),
-        contentScale = ContentScale.Fit,
+      BoxWithConstraints(
         modifier =
           Modifier
             .widthIn(max = 520.dp)
@@ -2104,21 +3955,257 @@ fun ShopDialog(
               onClick = {},
             )
             .testTag("shop_large_pack_orange_red_panel"),
-      )
+      ) {
+        val cardW = maxWidth
+        val cardH = maxHeight
+
+        Image(
+          painter = painterResource(id = R.drawable.panel_shop_large_orange_red),
+          contentDescription = stringResource(R.string.shop_large_pack_panel_desc),
+          contentScale = ContentScale.FillBounds,
+          modifier = Modifier.fillMaxSize(),
+        )
+
+        val largeTrayW = cardW * 0.288f
+        val largeTrayH = cardH * 0.355f
+        val largeQtyFour = stringResource(R.string.shop_booster_qty_four)
+        val largeQtyStyle =
+          MaterialTheme.typography.labelLarge.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (largeTrayH.value * 0.225f).coerceIn(10.5f, 16.5f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.2.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.628f, y = cardH * 0.169f)
+              .size(width = largeTrayW, height = largeTrayH)
+              .testTag("shop_large_pack_booster_tray"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.panel_shop_large_pack_tray),
+            contentDescription = stringResource(R.string.shop_large_pack_tray_desc),
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+          )
+          Row(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(horizontal = largeTrayW * 0.065f, vertical = largeTrayH * 0.085f),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            val largeBoosters =
+              listOf(
+                Pair(R.drawable.ic_shop_booster_vip, R.string.shop_booster_vip_desc),
+                Pair(R.drawable.ic_shop_booster_bus, R.string.shop_booster_bus_desc),
+                Pair(R.drawable.ic_shop_booster_refresh, R.string.shop_booster_refresh_desc),
+              )
+            largeBoosters.forEach { (iconRes, descRes) ->
+              Box(
+                modifier = Modifier.weight(1f).fillMaxSize(),
+                contentAlignment = Alignment.TopCenter,
+              ) {
+                Image(
+                  painter = painterResource(id = iconRes),
+                  contentDescription = stringResource(descRes),
+                  contentScale = ContentScale.Fit,
+                  modifier =
+                    Modifier
+                      .fillMaxWidth(0.92f)
+                      .height(largeTrayH * 0.62f)
+                      .padding(top = largeTrayH * 0.02f),
+                )
+                Box(
+                  modifier =
+                    Modifier
+                      .align(Alignment.BottomCenter)
+                      .padding(bottom = largeTrayH * 0.01f),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Text(
+                    text = largeQtyFour,
+                    style =
+                      largeQtyStyle.copy(
+                        drawStyle = Stroke(width = 5.5f, join = StrokeJoin.Round),
+                      ),
+                    color = Color.Black,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.offset(y = 0.8.dp),
+                  )
+                  Text(
+                    text = largeQtyFour,
+                    style =
+                      largeQtyStyle.copy(
+                        drawStyle = Stroke(width = 4.5f, join = StrokeJoin.Round),
+                      ),
+                    color = Color.Black,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                  Text(
+                    text = largeQtyFour,
+                    style = largeQtyStyle,
+                    color = Color.White,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                }
+              }
+            }
+          }
+        }
+
+        val largePriceBtnW = cardW * 0.272f
+        val largePriceBtnH = cardH * 0.198f
+        val largePriceTouchH = maxOf(largePriceBtnH, 48.dp)
+        val largePriceBtnCenterY = cardH * 0.692f + largePriceBtnH * 0.50f
+        val largePriceInteraction = remember { MutableInteractionSource() }
+        val isLargePricePressed by largePriceInteraction.collectIsPressedAsState()
+        val largePriceScale by animateFloatAsState(
+          targetValue = if (isLargePricePressed) 0.93f else 1f,
+          animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+          label = "largePackPriceBtnScale",
+        )
+        val largePriceText = stringResource(R.string.shop_large_pack_price)
+        val largePriceStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (largePriceBtnH.value * 0.345f).coerceIn(11.0f, 17.5f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.690f, y = largePriceBtnCenterY - largePriceTouchH * 0.50f)
+              .size(width = largePriceBtnW, height = largePriceTouchH)
+              .scale(largePriceScale)
+              .clickable(
+                interactionSource = largePriceInteraction,
+                indication = null,
+                onClick = {},
+              )
+              .testTag("shop_large_pack_price_button"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Box(
+            modifier = Modifier.size(width = largePriceBtnW, height = largePriceBtnH),
+            contentAlignment = Alignment.Center,
+          ) {
+            Image(
+              painter = painterResource(id = R.drawable.btn_shop_price_green),
+              contentDescription = "${stringResource(R.string.shop_large_pack_panel_desc)} $largePriceText",
+              contentScale = ContentScale.FillBounds,
+              modifier = Modifier.fillMaxSize(),
+            )
+            Box(
+              modifier =
+                Modifier
+                  .fillMaxSize()
+                  .padding(horizontal = largePriceBtnW * 0.05f)
+                  .padding(bottom = largePriceBtnH * 0.06f),
+              contentAlignment = Alignment.Center,
+            ) {
+              Text(
+                text = largePriceText,
+                style =
+                  largePriceStyle.copy(
+                    drawStyle = Stroke(width = 7.0f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF063810),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.offset(y = 1.2.dp),
+              )
+              Text(
+                text = largePriceText,
+                style =
+                  largePriceStyle.copy(
+                    drawStyle = Stroke(width = 5.5f, join = StrokeJoin.Round),
+                  ),
+                color = Color(0xFF0A4D18),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+              Text(
+                text = largePriceText,
+                style =
+                  largePriceStyle.copy(
+                    shadow = Shadow(color = Color(0x88063810), offset = Offset(0f, 1.2f), blurRadius = 1.2f),
+                  ),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                softWrap = false,
+              )
+            }
+          }
+        }
+      }
 
       Spacer(Modifier.height(20.dp))
 
+      data class ShopCoinTileConfig(
+        val drawableRes: Int,
+        val descRes: Int,
+        val amountRes: Int,
+        val priceRes: Int,
+        val tag: String,
+      )
       val tileRows =
         listOf(
           listOf(
-            Triple(R.drawable.tile_shop_coin_1000, R.string.shop_coin_tile_1000_desc, "shop_coin_tile_1000"),
-            Triple(R.drawable.tile_shop_coin_5000, R.string.shop_coin_tile_5000_desc, "shop_coin_tile_5000"),
-            Triple(R.drawable.tile_shop_coin_10000, R.string.shop_coin_tile_10000_desc, "shop_coin_tile_10000"),
+            ShopCoinTileConfig(
+              R.drawable.tile_shop_coin_1000,
+              R.string.shop_coin_tile_1000_desc,
+              R.string.shop_coin_tile_1000_amount,
+              R.string.shop_coin_tile_1000_price,
+              "shop_coin_tile_1000",
+            ),
+            ShopCoinTileConfig(
+              R.drawable.tile_shop_coin_5000,
+              R.string.shop_coin_tile_5000_desc,
+              R.string.shop_coin_tile_5000_amount,
+              R.string.shop_coin_tile_5000_price,
+              "shop_coin_tile_5000",
+            ),
+            ShopCoinTileConfig(
+              R.drawable.tile_shop_coin_10000,
+              R.string.shop_coin_tile_10000_desc,
+              R.string.shop_coin_tile_10000_amount,
+              R.string.shop_coin_tile_10000_price,
+              "shop_coin_tile_10000",
+            ),
           ),
           listOf(
-            Triple(R.drawable.tile_shop_coin_25000, R.string.shop_coin_tile_25000_desc, "shop_coin_tile_25000"),
-            Triple(R.drawable.tile_shop_coin_50000, R.string.shop_coin_tile_50000_desc, "shop_coin_tile_50000"),
-            Triple(R.drawable.tile_shop_coin_100000, R.string.shop_coin_tile_100000_desc, "shop_coin_tile_100000"),
+            ShopCoinTileConfig(
+              R.drawable.tile_shop_coin_25000,
+              R.string.shop_coin_tile_25000_desc,
+              R.string.shop_coin_tile_25000_amount,
+              R.string.shop_coin_tile_25000_price,
+              "shop_coin_tile_25000",
+            ),
+            ShopCoinTileConfig(
+              R.drawable.tile_shop_coin_50000,
+              R.string.shop_coin_tile_50000_desc,
+              R.string.shop_coin_tile_50000_amount,
+              R.string.shop_coin_tile_50000_price,
+              "shop_coin_tile_50000",
+            ),
+            ShopCoinTileConfig(
+              R.drawable.tile_shop_coin_100000,
+              R.string.shop_coin_tile_100000_desc,
+              R.string.shop_coin_tile_100000_amount,
+              R.string.shop_coin_tile_100000_price,
+              "shop_coin_tile_100000",
+            ),
           ),
         )
       Column(
@@ -2134,12 +4221,18 @@ fun ShopDialog(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
           ) {
-            rowTiles.forEach { (drawableRes, descRes, tag) ->
+            rowTiles.forEach { tile ->
               val tileInteraction = remember { MutableInteractionSource() }
-              Image(
-                painter = painterResource(id = drawableRes),
-                contentDescription = stringResource(descRes),
-                contentScale = ContentScale.FillBounds,
+              val tileBtnInteraction = remember { MutableInteractionSource() }
+              val isTileBtnPressed by tileBtnInteraction.collectIsPressedAsState()
+              val tileBtnScale by animateFloatAsState(
+                targetValue = if (isTileBtnPressed) 0.93f else 1f,
+                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                label = "${tile.tag}_btn_scale",
+              )
+              val tileAmountText = stringResource(tile.amountRes)
+              val tilePriceText = stringResource(tile.priceRes)
+              BoxWithConstraints(
                 modifier =
                   Modifier
                     .weight(1f)
@@ -2149,8 +4242,169 @@ fun ShopDialog(
                       indication = null,
                       onClick = {},
                     )
-                    .testTag(tag),
-              )
+                    .testTag(tile.tag),
+              ) {
+                val tileW = maxWidth
+                val tileH = maxHeight
+
+                Image(
+                  painter = painterResource(id = tile.drawableRes),
+                  contentDescription = stringResource(tile.descRes),
+                  contentScale = ContentScale.FillBounds,
+                  modifier = Modifier.fillMaxSize(),
+                )
+
+                val coinW = tileW * 0.56f
+                val coinH = coinW * (188f / 204f)
+                Image(
+                  painter = painterResource(id = R.drawable.ic_shop_coin_tile_cluster),
+                  contentDescription = null,
+                  contentScale = ContentScale.Fit,
+                  modifier =
+                    Modifier
+                      .offset(x = (tileW - coinW) * 0.50f, y = tileH * 0.130f)
+                      .size(width = coinW, height = coinH),
+                )
+
+                val tileAmountStyle =
+                  MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = LilitaOneFontFamily,
+                    fontSize = (tileW.value * 0.165f).coerceIn(13.5f, 22.0f).sp,
+                    fontWeight = FontWeight.Normal,
+                    letterSpacing = 0.2.sp,
+                  )
+                Box(
+                  modifier =
+                    Modifier
+                      .offset(x = 0.dp, y = tileH * 0.555f)
+                      .size(width = tileW, height = tileH * 0.160f)
+                      .padding(horizontal = tileW * 0.08f)
+                      .testTag("${tile.tag}_amount_label"),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Text(
+                    text = tileAmountText,
+                    style =
+                      tileAmountStyle.copy(
+                        drawStyle = Stroke(width = 6.5f, join = StrokeJoin.Round),
+                      ),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.offset(y = 1.0.dp),
+                  )
+                  Text(
+                    text = tileAmountText,
+                    style =
+                      tileAmountStyle.copy(
+                        drawStyle = Stroke(width = 5.2f, join = StrokeJoin.Round),
+                      ),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                  Text(
+                    text = tileAmountText,
+                    style = tileAmountStyle,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                }
+
+                val tileBtnW = tileW * 0.785f
+                val tileBtnH = tileH * 0.210f
+                val tileBtnTouchH = maxOf(tileBtnH, 48.dp)
+                val tileBtnBottom = tileH * 0.068f
+                val tileBtnCenterY = tileH - tileBtnBottom - tileBtnH * 0.50f
+                val tilePriceStyle =
+                  MaterialTheme.typography.labelLarge.copy(
+                    fontFamily = LilitaOneFontFamily,
+                    fontSize = (tileBtnW.value * 0.136f).coerceIn(9.5f, 14.0f).sp,
+                    fontWeight = FontWeight.Normal,
+                    letterSpacing = 0.sp,
+                  )
+                Box(
+                  modifier =
+                    Modifier
+                      .offset(
+                        x = (tileW - tileBtnW) * 0.50f,
+                        y = tileBtnCenterY - tileBtnTouchH * 0.50f,
+                      )
+                      .size(width = tileBtnW, height = tileBtnTouchH)
+                      .scale(tileBtnScale)
+                      .clickable(
+                        interactionSource = tileBtnInteraction,
+                        indication = null,
+                        onClick = {},
+                      )
+                      .testTag("${tile.tag}_price_button"),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Box(
+                    modifier = Modifier.size(width = tileBtnW, height = tileBtnH),
+                    contentAlignment = Alignment.Center,
+                  ) {
+                    Image(
+                      painter = painterResource(id = R.drawable.btn_shop_price_green),
+                      contentDescription = "${stringResource(tile.descRes)} $tilePriceText",
+                      contentScale = ContentScale.FillBounds,
+                      modifier = Modifier.fillMaxSize(),
+                    )
+                    Box(
+                      modifier =
+                        Modifier
+                          .fillMaxSize()
+                          .padding(horizontal = tileBtnW * 0.05f)
+                          .padding(bottom = tileBtnH * 0.06f),
+                      contentAlignment = Alignment.Center,
+                    ) {
+                      Text(
+                        text = tilePriceText,
+                        style =
+                          tilePriceStyle.copy(
+                            drawStyle = Stroke(width = 5.0f, join = StrokeJoin.Round),
+                          ),
+                        color = Color(0xFF063810),
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        softWrap = false,
+                        modifier = Modifier.offset(y = 1.0.dp),
+                      )
+                      Text(
+                        text = tilePriceText,
+                        style =
+                          tilePriceStyle.copy(
+                            drawStyle = Stroke(width = 3.8f, join = StrokeJoin.Round),
+                          ),
+                        color = Color(0xFF0A4D18),
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        softWrap = false,
+                      )
+                      Text(
+                        text = tilePriceText,
+                        style =
+                          tilePriceStyle.copy(
+                            shadow =
+                              Shadow(
+                                color = Color(0x88063810),
+                                offset = Offset(0f, 1.0f),
+                                blurRadius = 1.0f,
+                              ),
+                          ),
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        softWrap = false,
+                      )
+                    }
+                  }
+                }
+              }
             }
           }
         }
