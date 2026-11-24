@@ -749,10 +749,10 @@ fun SettingsPopupOverlay(
         }
       }
 
-      // Off-white/cream rounded tray behind the 3 top grouped toggle icons (matching reference)
-      val trayW = cardW * (if (isHomeSettings) 0.858f else 0.810f)
-      val trayH = cardH * (if (isHomeSettings) 0.194f else 0.160f)
-      val trayTopY = cardH * (if (isHomeSettings) 0.224f else 0.174f)
+      // Off-white/cream rounded tray behind the 3 top grouped toggle icons (neatly inset inside blue frame)
+      val trayW = cardW * (if (isHomeSettings) 0.790f else 0.800f)
+      val trayH = cardH * (if (isHomeSettings) 0.176f else 0.156f)
+      val trayTopY = cardH * (if (isHomeSettings) 0.262f else 0.180f)
       val trayX = (cardW - trayW) * 0.5f
       Canvas(
         modifier =
@@ -824,13 +824,14 @@ fun SettingsPopupOverlay(
         }
       }
 
-      // Top row: Slot 1 = Volume, Slot 2 = Vibrate, Slot 3 = Guide
-      val iconBoxW = cardW * (if (isHomeSettings) 0.205f else 0.172f)
-      val iconBoxH = maxOf(48.dp, if (isHomeSettings) cardH * 0.140f else iconBoxW * 0.94f)
+      // Top row: Slot 1 = Volume, Slot 2 = Vibrate, Slot 3 = Guide (evenly centered inside cream tray)
+      val iconBoxW = cardW * (if (isHomeSettings) 0.185f else 0.170f)
+      val iconBoxH = maxOf(48.dp, if (isHomeSettings) trayH * 0.72f else iconBoxW * 0.94f)
       val iconTopY = trayTopY + (trayH - iconBoxH) * 0.5f
-      val slot1X = if (isHomeSettings) cardW * 0.150f else trayX + cardW * 0.072f
-      val slot2X = if (isHomeSettings) cardW * 0.3975f else slot1X + iconBoxW + cardW * 0.075f
-      val slot3X = if (isHomeSettings) cardW * 0.645f else slot2X + iconBoxW + cardW * 0.075f
+      val iconGap = (trayW - iconBoxW * 3f) / 4f
+      val slot1X = trayX + iconGap
+      val slot2X = slot1X + iconBoxW + iconGap
+      val slot3X = slot2X + iconBoxW + iconGap
 
       // 1. Volume (ON / OFF muted speaker)
       SettingsSpriteButton(
@@ -913,7 +914,7 @@ fun SettingsPopupOverlay(
         )
       }
 
-      val supportY = if (isHomeSettings) cardH * 0.462f else cardH * 0.590f
+      val supportY = if (isHomeSettings) cardH * 0.466f else cardH * 0.590f
       val langY = if (isHomeSettings) cardH * 0.632f else cardH * 0.709f
 
       SettingsSpriteButton(
@@ -1566,14 +1567,14 @@ fun ShopDialog(
           modifier = Modifier.fillMaxSize(),
         )
 
-        val chestW = cardW * 0.250f
-        val chestH = chestW * (114f / 116f)
-        val chestCenterX = cardW * 0.332f
-        val chestTop = cardH * 0.082f
+        val chestW = cardW * 0.445f
+        val chestH = chestW * (369f / 654f)
+        val chestCenterX = cardW * 0.324f
+        val chestTop = cardH * 0.068f
         val chestCenterY = chestTop + chestH * 0.50f
 
-        val coinPileW = cardW * 0.118f
-        val coinPileH = coinPileW * (194f / 146f)
+        val starterLeftHoardSize = cardW * 0.210f
+        val starterRightHoardSize = cardW * 0.185f
 
         val starterChestAnim = rememberInfiniteTransition(label = "shopStarterChestAnim")
         val chestRaySpin by starterChestAnim.animateFloat(
@@ -1691,7 +1692,7 @@ fun ShopDialog(
           val insetY = (cardH * 0.055f).toPx()
           val cx = chestCenterX.toPx() - insetX
           val cy = chestCenterY.toPx() - insetY
-          val maxR = (chestW * 0.92f).toPx()
+          val maxR = (cardW * 0.250f).toPx()
           val haloAlpha = 0.72f + 0.24f * sin(chestGlowPulse * 2f * PI.toFloat())
 
           drawCircle(
@@ -1741,41 +1742,41 @@ fun ShopDialog(
           }
         }
 
-        // Left flanking gold coin pile (gently bobbing & tilting)
+        // Left flanking coin sack & gold coin hoard behind the chest (flipped so sack sits beside chest)
         Image(
-          painter = painterResource(id = R.drawable.ic_shop_starter_coin_pile),
+          painter = painterResource(id = R.drawable.ic_shop_special_coin_hoard),
           contentDescription = null,
           contentScale = ContentScale.Fit,
           modifier =
             Modifier
-              .offset(x = chestCenterX - chestW * 0.68f, y = cardH * 0.265f)
-              .size(width = coinPileW, height = coinPileH)
+              .offset(x = chestCenterX - chestW * 0.54f, y = cardH * 0.145f)
+              .size(starterLeftHoardSize)
               .graphicsLayer {
-                scaleX = -1f * (0.96f + 0.04f * chestScale)
-                scaleY = 0.96f + 0.04f * chestScale
-                rotationZ = leftCoinTilt
+                scaleX = -1f * (0.97f + 0.03f * chestScale)
+                scaleY = 0.97f + 0.03f * chestScale
+                rotationZ = leftCoinTilt * 0.6f
                 translationY = leftCoinBobDp.dp.toPx()
               },
         )
 
-        // Right flanking gold coin pile (gently bobbing & tilting)
+        // Right flanking coin sack & gold coin hoard behind the chest
         Image(
-          painter = painterResource(id = R.drawable.ic_shop_starter_coin_pile),
+          painter = painterResource(id = R.drawable.ic_shop_special_coin_hoard),
           contentDescription = null,
           contentScale = ContentScale.Fit,
           modifier =
             Modifier
-              .offset(x = chestCenterX + chestW * 0.22f, y = cardH * 0.265f)
-              .size(width = coinPileW, height = coinPileH)
+              .offset(x = chestCenterX + chestW * 0.19f, y = cardH * 0.188f)
+              .size(starterRightHoardSize)
               .graphicsLayer {
-                scaleX = 0.96f + 0.04f * chestScale
-                scaleY = 0.96f + 0.04f * chestScale
-                rotationZ = rightCoinTilt
+                scaleX = 0.97f + 0.03f * chestScale
+                scaleY = 0.97f + 0.03f * chestScale
+                rotationZ = rightCoinTilt * 0.6f
                 translationY = rightCoinBobDp.dp.toPx()
               },
         )
 
-        // Center 2nd treasure chest sprite with smooth continuous motion & twinkling stars
+        // Center red-and-blue treasure chest overflowing with gold coins + twinkling stars
         Box(
           modifier =
             Modifier
@@ -1785,16 +1786,16 @@ fun ShopDialog(
           contentAlignment = Alignment.Center,
         ) {
           Image(
-            painter = painterResource(id = R.drawable.ic_shop_starter_chest),
+            painter = painterResource(id = R.drawable.ic_shop_large_pack_chest),
             contentDescription = stringResource(R.string.shop_starter_chest_desc),
             contentScale = ContentScale.Fit,
             modifier =
               Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                  scaleX = chestScale
-                  scaleY = chestScale
-                  rotationZ = chestTilt
+                  scaleX = 0.98f + 0.02f * chestScale
+                  scaleY = 0.98f + 0.02f * chestScale
+                  rotationZ = chestTilt * 0.6f
                   translationY = chestBobDp.dp.toPx()
                 },
           )
@@ -1822,20 +1823,20 @@ fun ShopDialog(
             val t3 = ((sin((chestSparklePhase + 4.2f).toDouble()) + 1.0) * 0.5).toFloat()
 
             drawFourPointStar(
-              cx = size.width * -0.18f,
-              cy = size.height * 0.28f,
+              cx = size.width * 0.12f,
+              cy = size.height * 0.22f,
               radius = size.minDimension * (0.06f + 0.05f * t1),
               alpha = 0.25f + 0.75f * t1,
             )
             drawFourPointStar(
-              cx = size.width * 1.14f,
-              cy = size.height * 0.24f,
+              cx = size.width * 0.88f,
+              cy = size.height * 0.20f,
               radius = size.minDimension * (0.06f + 0.05f * t2),
               alpha = 0.25f + 0.75f * t2,
             )
             drawFourPointStar(
-              cx = size.width * 0.88f,
-              cy = size.height * 0.08f,
+              cx = size.width * 0.78f,
+              cy = size.height * 0.06f,
               radius = size.minDimension * (0.05f + 0.05f * t3),
               alpha = 0.25f + 0.75f * t3,
             )
@@ -1851,11 +1852,11 @@ fun ShopDialog(
             fontWeight = FontWeight.Normal,
             letterSpacing = 0.3.sp,
           )
-        val coinsBoxW = cardW * 0.22f
+        val coinsBoxW = cardW * 0.24f
         Box(
           modifier =
             Modifier
-              .offset(x = chestCenterX - coinsBoxW * 0.50f, y = cardH * 0.495f)
+              .offset(x = chestCenterX - coinsBoxW * 0.50f, y = cardH * 0.485f)
               .width(coinsBoxW)
               .testTag("shop_starter_coins_label"),
           contentAlignment = Alignment.Center,
@@ -2533,8 +2534,8 @@ fun ShopDialog(
             MaterialTheme.typography.labelSmall.copy(
               fontFamily = FontFamily.SansSerif,
               fontWeight = FontWeight.Black,
-              fontSize = (cardH.value * 0.118f).coerceIn(9.5f, 15.0f).sp,
-              letterSpacing = 0.25.sp,
+              fontSize = (cardW.value * 0.0285f).coerceIn(8.5f, 11.5f).sp,
+              letterSpacing = 0.2.sp,
               shadow = Shadow(color = Color(0x99320F6B), offset = Offset(0f, 1.5f), blurRadius = 1.5f),
             ),
           color = Color.White,
@@ -2542,7 +2543,7 @@ fun ShopDialog(
           softWrap = false,
           modifier =
             Modifier
-              .offset(x = cardW * 0.045f, y = cardH * 0.752f)
+              .offset(x = cardW * 0.052f, y = cardH * 0.765f)
               .testTag("shop_no_ads_rewarded_note"),
         )
       }
@@ -2874,20 +2875,20 @@ fun ShopDialog(
           }
         }
 
-        val packRibbonW = cardW * 0.592f
-        val packRibbonH = cardH * 0.312f
+        val packRibbonW = cardW * 0.548f
+        val packRibbonH = cardH * 0.244f
         val packRibbonTitle = stringResource(R.string.shop_no_ads_pack_title)
         val packRibbonTextStyle =
           MaterialTheme.typography.titleMedium.copy(
             fontFamily = LilitaOneFontFamily,
-            fontSize = (packRibbonH.value * 0.49f).coerceIn(16f, 27f).sp,
+            fontSize = (packRibbonH.value * 0.47f).coerceIn(13.5f, 22f).sp,
             fontWeight = FontWeight.Normal,
-            letterSpacing = 0.3.sp,
+            letterSpacing = 0.25.sp,
           )
         Box(
           modifier =
             Modifier
-              .offset(x = cardW * 0.032f, y = cardH * 0.531f)
+              .offset(x = cardW * 0.045f, y = cardH * 0.572f)
               .size(width = packRibbonW, height = packRibbonH)
               .testTag("shop_no_ads_pack_ribbon"),
           contentAlignment = Alignment.Center,
@@ -3038,8 +3039,8 @@ fun ShopDialog(
             MaterialTheme.typography.labelSmall.copy(
               fontFamily = FontFamily.SansSerif,
               fontWeight = FontWeight.Black,
-              fontSize = (cardW.value * 0.036f).coerceIn(9.5f, 15.0f).sp,
-              letterSpacing = 0.25.sp,
+              fontSize = (cardW.value * 0.0285f).coerceIn(8.5f, 11.5f).sp,
+              letterSpacing = 0.2.sp,
               shadow = Shadow(color = Color(0x9900256E), offset = Offset(0f, 1.5f), blurRadius = 1.5f),
             ),
           color = Color.White,
@@ -3049,7 +3050,7 @@ fun ShopDialog(
           modifier =
             Modifier
               .align(Alignment.BottomCenter)
-              .padding(bottom = cardH * 0.044f)
+              .padding(bottom = cardH * 0.048f)
               .testTag("shop_no_ads_pack_rewarded_note"),
         )
       }
@@ -3081,13 +3082,13 @@ fun ShopDialog(
           modifier = Modifier.fillMaxSize(),
         )
 
-        val smallChestW = cardW * 0.268f
-        val smallChestH = smallChestW * (256f / 284f)
-        val smallChestCenterX = cardW * 0.328f
-        val smallChestTop = cardH * 0.068f
+        val smallChestW = cardW * 0.455f
+        val smallChestH = smallChestW * (361f / 670f)
+        val smallChestCenterX = cardW * 0.326f
+        val smallChestTop = cardH * 0.072f
         val smallChestCenterY = smallChestTop + smallChestH * 0.50f
-        val smallCoinPileW = cardW * 0.132f
-        val smallCoinPileH = smallCoinPileW * (194f / 146f)
+        val smallLeftHoardSize = cardW * 0.215f
+        val smallRightHoardSize = cardW * 0.190f
         val smallChestAnim = rememberInfiniteTransition(label = "smallPackChestAnim")
         val smallRaySpin by smallChestAnim.animateFloat(
           initialValue = 0f,
@@ -3204,7 +3205,7 @@ fun ShopDialog(
           val insetY = (cardH * 0.055f).toPx()
           val cx = smallChestCenterX.toPx() - insetX
           val cy = smallChestCenterY.toPx() - insetY
-          val maxR = (smallChestW * 0.92f).toPx()
+          val maxR = (cardW * 0.250f).toPx()
           val haloAlpha = 0.72f + 0.24f * sin(smallGlowPulse * 2f * PI.toFloat())
 
           drawCircle(
@@ -3254,41 +3255,41 @@ fun ShopDialog(
           }
         }
 
-        // Left flanking crisp gold coin pile (gently bobbing & tilting)
+        // Left flanking coin sack & gold coin hoard behind the chest (flipped so sack sits beside chest)
         Image(
-          painter = painterResource(id = R.drawable.ic_shop_starter_coin_pile),
+          painter = painterResource(id = R.drawable.ic_shop_special_coin_hoard),
           contentDescription = null,
           contentScale = ContentScale.Fit,
           modifier =
             Modifier
-              .offset(x = smallChestCenterX - smallChestW * 0.70f, y = cardH * 0.248f)
-              .size(width = smallCoinPileW, height = smallCoinPileH)
+              .offset(x = smallChestCenterX - smallChestW * 0.54f, y = cardH * 0.145f)
+              .size(smallLeftHoardSize)
               .graphicsLayer {
-                scaleX = -1f * (0.96f + 0.04f * smallChestScale)
-                scaleY = 0.96f + 0.04f * smallChestScale
-                rotationZ = smallLeftCoinTilt
+                scaleX = -1f * (0.97f + 0.03f * smallChestScale)
+                scaleY = 0.97f + 0.03f * smallChestScale
+                rotationZ = smallLeftCoinTilt * 0.6f
                 translationY = smallLeftCoinBobDp.dp.toPx()
               },
         )
 
-        // Right flanking crisp gold coin pile (gently bobbing & tilting)
+        // Right flanking coin sack & gold coin hoard behind the chest
         Image(
-          painter = painterResource(id = R.drawable.ic_shop_starter_coin_pile),
+          painter = painterResource(id = R.drawable.ic_shop_special_coin_hoard),
           contentDescription = null,
           contentScale = ContentScale.Fit,
           modifier =
             Modifier
-              .offset(x = smallChestCenterX + smallChestW * 0.21f, y = cardH * 0.248f)
-              .size(width = smallCoinPileW, height = smallCoinPileH)
+              .offset(x = smallChestCenterX + smallChestW * 0.19f, y = cardH * 0.188f)
+              .size(smallRightHoardSize)
               .graphicsLayer {
-                scaleX = 0.96f + 0.04f * smallChestScale
-                scaleY = 0.96f + 0.04f * smallChestScale
-                rotationZ = smallRightCoinTilt
+                scaleX = 0.97f + 0.03f * smallChestScale
+                scaleY = 0.97f + 0.03f * smallChestScale
+                rotationZ = smallRightCoinTilt * 0.6f
                 translationY = smallRightCoinBobDp.dp.toPx()
               },
         )
 
-        // Center blue treasure chest with smooth continuous motion & twinkling stars
+        // Center glossy blue treasure chest overflowing with gold coins + twinkling stars
         Box(
           modifier =
             Modifier
@@ -3298,16 +3299,16 @@ fun ShopDialog(
           contentAlignment = Alignment.Center,
         ) {
           Image(
-            painter = painterResource(id = R.drawable.ic_shop_small_pack_chest_clean),
+            painter = painterResource(id = R.drawable.ic_shop_small_pack_chest),
             contentDescription = stringResource(R.string.shop_small_pack_chest_desc),
             contentScale = ContentScale.Fit,
             modifier =
               Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                  scaleX = smallChestScale
-                  scaleY = smallChestScale
-                  rotationZ = smallChestTilt
+                  scaleX = 0.98f + 0.02f * smallChestScale
+                  scaleY = 0.98f + 0.02f * smallChestScale
+                  rotationZ = smallChestTilt * 0.6f
                   translationY = smallChestBobDp.dp.toPx()
                 },
           )
@@ -3335,20 +3336,20 @@ fun ShopDialog(
             val t3 = ((sin((smallSparklePhase + 4.2f).toDouble()) + 1.0) * 0.5).toFloat()
 
             drawFourPointStar(
-              cx = size.width * -0.18f,
-              cy = size.height * 0.28f,
+              cx = size.width * 0.12f,
+              cy = size.height * 0.22f,
               radius = size.minDimension * (0.06f + 0.05f * t1),
               alpha = 0.25f + 0.75f * t1,
             )
             drawFourPointStar(
-              cx = size.width * 1.14f,
-              cy = size.height * 0.24f,
+              cx = size.width * 0.88f,
+              cy = size.height * 0.20f,
               radius = size.minDimension * (0.06f + 0.05f * t2),
               alpha = 0.25f + 0.75f * t2,
             )
             drawFourPointStar(
-              cx = size.width * 0.88f,
-              cy = size.height * 0.08f,
+              cx = size.width * 0.78f,
+              cy = size.height * 0.06f,
               radius = size.minDimension * (0.05f + 0.05f * t3),
               alpha = 0.25f + 0.75f * t3,
             )
@@ -3368,7 +3369,7 @@ fun ShopDialog(
         Box(
           modifier =
             Modifier
-              .offset(x = smallChestCenterX - smallCoinsBoxW * 0.50f, y = cardH * 0.492f)
+              .offset(x = smallChestCenterX - smallCoinsBoxW * 0.50f, y = cardH * 0.482f)
               .width(smallCoinsBoxW)
               .testTag("shop_small_pack_coins_label"),
           contentAlignment = Alignment.Center,
@@ -3406,20 +3407,20 @@ fun ShopDialog(
           )
         }
 
-        val smallRibbonW = cardW * 0.576f
-        val smallRibbonH = cardH * 0.308f
+        val smallRibbonW = cardW * 0.530f
+        val smallRibbonH = cardH * 0.240f
         val smallRibbonTitle = stringResource(R.string.shop_small_pack_title)
         val smallRibbonTextStyle =
           MaterialTheme.typography.titleMedium.copy(
             fontFamily = LilitaOneFontFamily,
-            fontSize = (smallRibbonH.value * 0.49f).coerceIn(16f, 27f).sp,
+            fontSize = (smallRibbonH.value * 0.48f).coerceIn(13.5f, 22f).sp,
             fontWeight = FontWeight.Normal,
-            letterSpacing = 0.3.sp,
+            letterSpacing = 0.25.sp,
           )
         Box(
           modifier =
             Modifier
-              .offset(x = cardW * 0.018f, y = cardH * 0.664f)
+              .offset(x = cardW * 0.045f, y = cardH * 0.688f)
               .size(width = smallRibbonW, height = smallRibbonH)
               .testTag("shop_small_pack_ribbon"),
           contentAlignment = Alignment.Center,
@@ -3564,8 +3565,8 @@ fun ShopDialog(
           }
         }
 
-        val smallTrayW = cardW * 0.285f
-        val smallTrayH = cardH * 0.390f
+        val smallTrayW = cardW * 0.288f
+        val smallTrayH = cardH * 0.370f
         val smallQtyOne = stringResource(R.string.shop_booster_qty_one)
         val smallQtyStyle =
           MaterialTheme.typography.labelLarge.copy(
@@ -3577,13 +3578,13 @@ fun ShopDialog(
         Box(
           modifier =
             Modifier
-              .offset(x = cardW * 0.630f, y = cardH * 0.176f)
+              .offset(x = cardW * 0.628f, y = cardH * 0.186f)
               .size(width = smallTrayW, height = smallTrayH)
               .testTag("shop_small_pack_booster_tray"),
           contentAlignment = Alignment.Center,
         ) {
           Image(
-            painter = painterResource(id = R.drawable.panel_shop_small_pack_tray),
+            painter = painterResource(id = R.drawable.panel_starter_pack_blue_tray),
             contentDescription = stringResource(R.string.shop_small_pack_tray_desc),
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.fillMaxSize(),
@@ -3685,6 +3686,331 @@ fun ShopDialog(
           contentScale = ContentScale.FillBounds,
           modifier = Modifier.fillMaxSize(),
         )
+
+        val specialChestW = cardW * 0.455f
+        val specialChestH = specialChestW * (360f / 669f)
+        val specialChestCenterX = cardW * 0.330f
+        val specialChestTop = cardH * 0.072f
+        val specialChestCenterY = specialChestTop + specialChestH * 0.50f
+        val specialChestAnim = rememberInfiniteTransition(label = "specialPackChestAnim")
+        val specialRaySpin by specialChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = 360f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 9000, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "specialChestRaySpin",
+        )
+        val specialGlowPulse by specialChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = 1f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 2400, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "specialChestGlowPulse",
+        )
+        val specialChestScale by specialChestAnim.animateFloat(
+          initialValue = 0.96f,
+          targetValue = 1.04f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 900, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "specialChestScale",
+        )
+        val specialChestTilt by specialChestAnim.animateFloat(
+          initialValue = -2.5f,
+          targetValue = 2.5f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1150, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "specialChestTilt",
+        )
+        val specialChestBobDp by specialChestAnim.animateFloat(
+          initialValue = -1.6f,
+          targetValue = 1.6f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 980, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "specialChestBob",
+        )
+        val specialLeftCoinBobDp by specialChestAnim.animateFloat(
+          initialValue = 1.8f,
+          targetValue = -1.8f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 820, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "specialLeftCoinBob",
+        )
+        val specialLeftCoinTilt by specialChestAnim.animateFloat(
+          initialValue = -3.5f,
+          targetValue = 3.0f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1040, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "specialLeftCoinTilt",
+        )
+        val specialRightCoinBobDp by specialChestAnim.animateFloat(
+          initialValue = -1.8f,
+          targetValue = 1.8f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 880, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "specialRightCoinBob",
+        )
+        val specialRightCoinTilt by specialChestAnim.animateFloat(
+          initialValue = 3.5f,
+          targetValue = -3.0f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "specialRightCoinTilt",
+        )
+        val specialSparklePhase by specialChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = (2.0 * PI).toFloat(),
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1800, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "specialChestSparkle",
+        )
+
+        // Rotating white sunbeam rays & radiant halo strictly behind the Special Pack chest
+        Canvas(
+          modifier =
+            Modifier
+              .fillMaxWidth()
+              .height(cardH * 0.65f)
+              .padding(horizontal = cardW * 0.024f, vertical = cardH * 0.055f)
+              .clip(RoundedCornerShape(cardH * 0.11f))
+              .testTag("shop_special_pack_chest_rays"),
+        ) {
+          val insetX = (cardW * 0.024f).toPx()
+          val insetY = (cardH * 0.055f).toPx()
+          val cx = specialChestCenterX.toPx() - insetX
+          val cy = specialChestCenterY.toPx() - insetY
+          val maxR = (cardW * 0.255f).toPx()
+          val haloAlpha = 0.72f + 0.24f * sin(specialGlowPulse * 2f * PI.toFloat())
+
+          drawCircle(
+            brush =
+              Brush.radialGradient(
+                colors =
+                  listOf(
+                    Color(0xF0FFFBE8).copy(alpha = haloAlpha),
+                    Color(0x99FFFFFF).copy(alpha = haloAlpha * 0.75f),
+                    Color.Transparent,
+                  ),
+                center = Offset(cx, cy),
+                radius = maxR * 0.85f,
+              ),
+            radius = maxR * 0.85f,
+            center = Offset(cx, cy),
+          )
+
+          val rayBrush =
+            Brush.radialGradient(
+              colors =
+                listOf(
+                  Color(0xE8FFFFFF),
+                  Color(0x88F7EBFF),
+                  Color(0x22FFFFFF),
+                  Color.Transparent,
+                ),
+              center = Offset(cx, cy),
+              radius = maxR,
+            )
+          rotate(degrees = specialRaySpin, pivot = Offset(cx, cy)) {
+            val rayCount = 12
+            for (i in 0 until rayCount) {
+              val a0 = (i * (360.0 / rayCount)) * (PI / 180.0)
+              val halfSpread = 0.12
+              val a1 = a0 + halfSpread
+              val a2 = a0 - halfSpread
+              val rayPath =
+                Path().apply {
+                  moveTo(cx, cy)
+                  lineTo(cx + cos(a1).toFloat() * maxR, cy + sin(a1).toFloat() * maxR)
+                  lineTo(cx + cos(a2).toFloat() * maxR, cy + sin(a2).toFloat() * maxR)
+                  close()
+                }
+              drawPath(rayPath, brush = rayBrush)
+            }
+          }
+        }
+
+        // Left flanking coin sack & gold coin hoard (flipped horizontally so sack sits beside chest and coins spill left)
+        val specialLeftHoardSize = cardW * 0.215f
+        Image(
+          painter = painterResource(id = R.drawable.ic_shop_special_coin_hoard),
+          contentDescription = null,
+          contentScale = ContentScale.Fit,
+          modifier =
+            Modifier
+              .offset(x = specialChestCenterX - specialChestW * 0.54f, y = cardH * 0.145f)
+              .size(specialLeftHoardSize)
+              .graphicsLayer {
+                scaleX = -1f * (0.97f + 0.03f * specialChestScale)
+                scaleY = 0.97f + 0.03f * specialChestScale
+                rotationZ = specialLeftCoinTilt * 0.6f
+                translationY = specialLeftCoinBobDp.dp.toPx()
+              },
+        )
+
+        // Right flanking coin sack & gold coin hoard (sack beside chest, coins spill right)
+        val specialRightHoardSize = cardW * 0.190f
+        Image(
+          painter = painterResource(id = R.drawable.ic_shop_special_coin_hoard),
+          contentDescription = null,
+          contentScale = ContentScale.Fit,
+          modifier =
+            Modifier
+              .offset(x = specialChestCenterX + specialChestW * 0.19f, y = cardH * 0.185f)
+              .size(specialRightHoardSize)
+              .graphicsLayer {
+                scaleX = 0.97f + 0.03f * specialChestScale
+                scaleY = 0.97f + 0.03f * specialChestScale
+                rotationZ = specialRightCoinTilt * 0.6f
+                translationY = specialRightCoinBobDp.dp.toPx()
+              },
+        )
+
+        // Left-facing violet treasure chest overflowing with gold coins + twinkling stars
+        Box(
+          modifier =
+            Modifier
+              .offset(x = specialChestCenterX - specialChestW * 0.50f, y = specialChestTop)
+              .size(width = specialChestW, height = specialChestH)
+              .testTag("shop_special_pack_animated_chest"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.ic_shop_special_pack_chest),
+            contentDescription = stringResource(R.string.shop_special_pack_chest_desc),
+            contentScale = ContentScale.Fit,
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                  scaleX = 0.98f + 0.02f * specialChestScale
+                  scaleY = 0.98f + 0.02f * specialChestScale
+                  rotationZ = specialChestTilt * 0.6f
+                  translationY = specialChestBobDp.dp.toPx()
+                },
+          )
+          Canvas(modifier = Modifier.fillMaxSize()) {
+            fun drawFourPointStar(cx: Float, cy: Float, radius: Float, alpha: Float) {
+              if (alpha <= 0.05f || radius <= 0.5f) return
+              val inner = radius * 0.24f
+              val starPath =
+                Path().apply {
+                  moveTo(cx, cy - radius)
+                  lineTo(cx + inner, cy - inner)
+                  lineTo(cx + radius, cy)
+                  lineTo(cx + inner, cy + inner)
+                  lineTo(cx, cy + radius)
+                  lineTo(cx - inner, cy + inner)
+                  lineTo(cx - radius, cy)
+                  lineTo(cx - inner, cy - inner)
+                  close()
+                }
+              drawPath(path = starPath, color = Color.White.copy(alpha = alpha))
+            }
+
+            val t1 = ((sin(specialSparklePhase.toDouble()) + 1.0) * 0.5).toFloat()
+            val t2 = ((sin((specialSparklePhase + 2.1f).toDouble()) + 1.0) * 0.5).toFloat()
+            val t3 = ((sin((specialSparklePhase + 4.2f).toDouble()) + 1.0) * 0.5).toFloat()
+
+            drawFourPointStar(
+              cx = size.width * 0.12f,
+              cy = size.height * 0.22f,
+              radius = size.minDimension * (0.06f + 0.05f * t1),
+              alpha = 0.25f + 0.75f * t1,
+            )
+            drawFourPointStar(
+              cx = size.width * 0.88f,
+              cy = size.height * 0.20f,
+              radius = size.minDimension * (0.06f + 0.05f * t2),
+              alpha = 0.25f + 0.75f * t2,
+            )
+            drawFourPointStar(
+              cx = size.width * 0.78f,
+              cy = size.height * 0.06f,
+              radius = size.minDimension * (0.05f + 0.05f * t3),
+              alpha = 0.25f + 0.75f * t3,
+            )
+          }
+        }
+
+        // Bold crisp white "10000" label with sharp black outline right below the Special Pack chest
+        val specialCoinsLabel = stringResource(R.string.shop_special_pack_coins_amount)
+        val specialCoinsLabelStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (cardH.value * 0.118f).coerceIn(15f, 24f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.3.sp,
+          )
+        val specialCoinsBoxW = cardW * 0.28f
+        Box(
+          modifier =
+            Modifier
+              .offset(x = specialChestCenterX - specialCoinsBoxW * 0.50f, y = cardH * 0.482f)
+              .width(specialCoinsBoxW)
+              .testTag("shop_special_pack_coins_label"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Text(
+            text = specialCoinsLabel,
+            style =
+              specialCoinsLabelStyle.copy(
+                drawStyle = Stroke(width = 8.5f, join = StrokeJoin.Round),
+              ),
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.offset(y = 1.2.dp),
+          )
+          Text(
+            text = specialCoinsLabel,
+            style =
+              specialCoinsLabelStyle.copy(
+                drawStyle = Stroke(width = 7.0f, join = StrokeJoin.Round),
+              ),
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+          )
+          Text(
+            text = specialCoinsLabel,
+            style = specialCoinsLabelStyle,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+          )
+        }
 
         val specialRibbonW = cardW * 0.525f
         val specialRibbonH = cardH * 0.238f
@@ -3966,6 +4292,400 @@ fun ShopDialog(
           modifier = Modifier.fillMaxSize(),
         )
 
+        val largeChestW = cardW * 0.455f
+        val largeChestH = largeChestW * (369f / 654f)
+        val largeChestCenterX = cardW * 0.330f
+        val largeChestTop = cardH * 0.068f
+        val largeChestCenterY = largeChestTop + largeChestH * 0.50f
+        val largeChestAnim = rememberInfiniteTransition(label = "largePackChestAnim")
+        val largeRaySpin by largeChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = 360f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 9000, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "largeChestRaySpin",
+        )
+        val largeGlowPulse by largeChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = 1f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 2400, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "largeChestGlowPulse",
+        )
+        val largeChestScale by largeChestAnim.animateFloat(
+          initialValue = 0.96f,
+          targetValue = 1.04f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 900, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "largeChestScale",
+        )
+        val largeChestTilt by largeChestAnim.animateFloat(
+          initialValue = -2.0f,
+          targetValue = 2.0f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1150, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "largeChestTilt",
+        )
+        val largeChestBobDp by largeChestAnim.animateFloat(
+          initialValue = -1.5f,
+          targetValue = 1.5f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 980, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "largeChestBob",
+        )
+        val largeLeftCoinBobDp by largeChestAnim.animateFloat(
+          initialValue = 1.8f,
+          targetValue = -1.8f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 820, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "largeLeftCoinBob",
+        )
+        val largeLeftCoinTilt by largeChestAnim.animateFloat(
+          initialValue = -3.0f,
+          targetValue = 2.8f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1040, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "largeLeftCoinTilt",
+        )
+        val largeRightCoinBobDp by largeChestAnim.animateFloat(
+          initialValue = -1.8f,
+          targetValue = 1.8f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 880, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "largeRightCoinBob",
+        )
+        val largeRightCoinTilt by largeChestAnim.animateFloat(
+          initialValue = 3.0f,
+          targetValue = -2.8f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
+              repeatMode = RepeatMode.Reverse,
+            ),
+          label = "largeRightCoinTilt",
+        )
+        val largeSparklePhase by largeChestAnim.animateFloat(
+          initialValue = 0f,
+          targetValue = (2.0 * PI).toFloat(),
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 1800, easing = LinearEasing),
+              repeatMode = RepeatMode.Restart,
+            ),
+          label = "largeChestSparkle",
+        )
+
+        // Rotating white sunbeam rays & radiant halo strictly behind the Large Pack chest
+        Canvas(
+          modifier =
+            Modifier
+              .fillMaxWidth()
+              .height(cardH * 0.63f)
+              .padding(horizontal = cardW * 0.024f, vertical = cardH * 0.052f)
+              .clip(RoundedCornerShape(cardH * 0.11f))
+              .testTag("shop_large_pack_chest_rays"),
+        ) {
+          val insetX = (cardW * 0.024f).toPx()
+          val insetY = (cardH * 0.052f).toPx()
+          val cx = largeChestCenterX.toPx() - insetX
+          val cy = largeChestCenterY.toPx() - insetY
+          val maxR = (cardW * 0.255f).toPx()
+          val haloAlpha = 0.72f + 0.24f * sin(largeGlowPulse * 2f * PI.toFloat())
+
+          drawCircle(
+            brush =
+              Brush.radialGradient(
+                colors =
+                  listOf(
+                    Color(0xF0FFFBE8).copy(alpha = haloAlpha),
+                    Color(0x99FFFFFF).copy(alpha = haloAlpha * 0.75f),
+                    Color.Transparent,
+                  ),
+                center = Offset(cx, cy),
+                radius = maxR * 0.85f,
+              ),
+            radius = maxR * 0.85f,
+            center = Offset(cx, cy),
+          )
+
+          val rayBrush =
+            Brush.radialGradient(
+              colors =
+                listOf(
+                  Color(0xE8FFFFFF),
+                  Color(0x88FFF0DE),
+                  Color(0x22FFFFFF),
+                  Color.Transparent,
+                ),
+              center = Offset(cx, cy),
+              radius = maxR,
+            )
+          rotate(degrees = largeRaySpin, pivot = Offset(cx, cy)) {
+            val rayCount = 12
+            for (i in 0 until rayCount) {
+              val a0 = (i * (360.0 / rayCount)) * (PI / 180.0)
+              val halfSpread = 0.12
+              val a1 = a0 + halfSpread
+              val a2 = a0 - halfSpread
+              val rayPath =
+                Path().apply {
+                  moveTo(cx, cy)
+                  lineTo(cx + cos(a1).toFloat() * maxR, cy + sin(a1).toFloat() * maxR)
+                  lineTo(cx + cos(a2).toFloat() * maxR, cy + sin(a2).toFloat() * maxR)
+                  close()
+                }
+              drawPath(rayPath, brush = rayBrush)
+            }
+          }
+        }
+
+        // Left flanking coin sack & gold coin hoard behind the chest (flipped so sack sits beside chest)
+        val largeLeftHoardSize = cardW * 0.215f
+        Image(
+          painter = painterResource(id = R.drawable.ic_shop_special_coin_hoard),
+          contentDescription = null,
+          contentScale = ContentScale.Fit,
+          modifier =
+            Modifier
+              .offset(x = largeChestCenterX - largeChestW * 0.54f, y = cardH * 0.145f)
+              .size(largeLeftHoardSize)
+              .graphicsLayer {
+                scaleX = -1f * (0.97f + 0.03f * largeChestScale)
+                scaleY = 0.97f + 0.03f * largeChestScale
+                rotationZ = largeLeftCoinTilt
+                translationY = largeLeftCoinBobDp.dp.toPx()
+              },
+        )
+
+        // Right flanking coin sack & gold coin hoard behind the chest
+        val largeRightHoardSize = cardW * 0.190f
+        Image(
+          painter = painterResource(id = R.drawable.ic_shop_special_coin_hoard),
+          contentDescription = null,
+          contentScale = ContentScale.Fit,
+          modifier =
+            Modifier
+              .offset(x = largeChestCenterX + largeChestW * 0.19f, y = cardH * 0.185f)
+              .size(largeRightHoardSize)
+              .graphicsLayer {
+                scaleX = 0.97f + 0.03f * largeChestScale
+                scaleY = 0.97f + 0.03f * largeChestScale
+                rotationZ = largeRightCoinTilt
+                translationY = largeRightCoinBobDp.dp.toPx()
+              },
+        )
+
+        // Center red-and-blue treasure chest overflowing with gold coins + twinkling stars
+        Box(
+          modifier =
+            Modifier
+              .offset(x = largeChestCenterX - largeChestW * 0.50f, y = largeChestTop)
+              .size(width = largeChestW, height = largeChestH)
+              .testTag("shop_large_pack_animated_chest"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.ic_shop_large_pack_chest),
+            contentDescription = stringResource(R.string.shop_large_pack_chest_desc),
+            contentScale = ContentScale.Fit,
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                  scaleX = largeChestScale
+                  scaleY = largeChestScale
+                  rotationZ = largeChestTilt
+                  translationY = largeChestBobDp.dp.toPx()
+                },
+          )
+          Canvas(modifier = Modifier.fillMaxSize()) {
+            fun drawFourPointStar(cx: Float, cy: Float, radius: Float, alpha: Float) {
+              if (alpha <= 0.05f || radius <= 0.5f) return
+              val inner = radius * 0.24f
+              val starPath =
+                Path().apply {
+                  moveTo(cx, cy - radius)
+                  lineTo(cx + inner, cy - inner)
+                  lineTo(cx + radius, cy)
+                  lineTo(cx + inner, cy + inner)
+                  lineTo(cx, cy + radius)
+                  lineTo(cx - inner, cy + inner)
+                  lineTo(cx - radius, cy)
+                  lineTo(cx - inner, cy - inner)
+                  close()
+                }
+              drawPath(path = starPath, color = Color.White.copy(alpha = alpha))
+            }
+
+            val t1 = ((sin(largeSparklePhase.toDouble()) + 1.0) * 0.5).toFloat()
+            val t2 = ((sin((largeSparklePhase + 2.1f).toDouble()) + 1.0) * 0.5).toFloat()
+            val t3 = ((sin((largeSparklePhase + 4.2f).toDouble()) + 1.0) * 0.5).toFloat()
+
+            drawFourPointStar(
+              cx = size.width * 0.12f,
+              cy = size.height * 0.22f,
+              radius = size.minDimension * (0.06f + 0.05f * t1),
+              alpha = 0.25f + 0.75f * t1,
+            )
+            drawFourPointStar(
+              cx = size.width * 0.88f,
+              cy = size.height * 0.20f,
+              radius = size.minDimension * (0.06f + 0.05f * t2),
+              alpha = 0.25f + 0.75f * t2,
+            )
+            drawFourPointStar(
+              cx = size.width * 0.78f,
+              cy = size.height * 0.06f,
+              radius = size.minDimension * (0.05f + 0.05f * t3),
+              alpha = 0.25f + 0.75f * t3,
+            )
+          }
+        }
+
+        // Bold crisp white "25000" label with sharp black outline right below the Large Pack chest
+        val largeCoinsLabel = stringResource(R.string.shop_large_pack_coins_amount)
+        val largeCoinsLabelStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (cardH.value * 0.118f).coerceIn(15f, 24f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.3.sp,
+          )
+        val largeCoinsBoxW = cardW * 0.28f
+        Box(
+          modifier =
+            Modifier
+              .offset(x = largeChestCenterX - largeCoinsBoxW * 0.50f, y = cardH * 0.475f)
+              .width(largeCoinsBoxW)
+              .testTag("shop_large_pack_coins_label"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Text(
+            text = largeCoinsLabel,
+            style =
+              largeCoinsLabelStyle.copy(
+                drawStyle = Stroke(width = 8.5f, join = StrokeJoin.Round),
+              ),
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.offset(y = 1.2.dp),
+          )
+          Text(
+            text = largeCoinsLabel,
+            style =
+              largeCoinsLabelStyle.copy(
+                drawStyle = Stroke(width = 7.0f, join = StrokeJoin.Round),
+              ),
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+          )
+          Text(
+            text = largeCoinsLabel,
+            style = largeCoinsLabelStyle,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+          )
+        }
+
+        val largeRibbonW = cardW * 0.606f
+        val largeRibbonH = largeRibbonW * (172f / 856f)
+        val largeRibbonTitle = stringResource(R.string.shop_large_pack_title)
+        val largeRibbonTextStyle =
+          MaterialTheme.typography.titleMedium.copy(
+            fontFamily = LilitaOneFontFamily,
+            fontSize = (largeRibbonH.value * 0.48f).coerceIn(13.5f, 22f).sp,
+            fontWeight = FontWeight.Normal,
+            letterSpacing = 0.25.sp,
+          )
+        Box(
+          modifier =
+            Modifier
+              .offset(x = cardW * 0.032f, y = cardH * 0.672f)
+              .size(width = largeRibbonW, height = largeRibbonH)
+              .testTag("shop_large_pack_ribbon"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.ribbon_shop_large_red),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+          )
+          Box(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(horizontal = largeRibbonW * 0.18f)
+                .padding(bottom = largeRibbonH * 0.12f),
+            contentAlignment = Alignment.Center,
+          ) {
+            Text(
+              text = largeRibbonTitle,
+              style =
+                largeRibbonTextStyle.copy(
+                  drawStyle = Stroke(width = 7.5f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF5A0606),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+              modifier = Modifier.offset(y = 1.5.dp),
+            )
+            Text(
+              text = largeRibbonTitle,
+              style =
+                largeRibbonTextStyle.copy(
+                  drawStyle = Stroke(width = 6.0f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF700B0B),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+            Text(
+              text = largeRibbonTitle,
+              style =
+                largeRibbonTextStyle.copy(
+                  shadow = Shadow(color = Color(0x994A0000), offset = Offset(0f, 1.5f), blurRadius = 1.5f),
+                ),
+              color = Color.White,
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+          }
+        }
+
         val largeTrayW = cardW * 0.288f
         val largeTrayH = cardH * 0.355f
         val largeQtyFour = stringResource(R.string.shop_booster_qty_four)
@@ -4099,7 +4819,7 @@ fun ShopDialog(
           ) {
             Image(
               painter = painterResource(id = R.drawable.btn_shop_price_green),
-              contentDescription = "${stringResource(R.string.shop_large_pack_panel_desc)} $largePriceText",
+              contentDescription = "$largeRibbonTitle $largePriceText",
               contentScale = ContentScale.FillBounds,
               modifier = Modifier.fillMaxSize(),
             )
@@ -4527,9 +5247,9 @@ fun StarterPackDialog(
       )
 
       // 2. Behind-the-chest animated glow halo, rotating sunbeam rays & twinkling sparkles
-      val chestW = cardW * 0.67f
-      val chestH = chestW * (303f / 362f)
-      val chestCenterY = cardH * 0.376f
+      val chestW = cardW * 0.76f
+      val chestH = chestW * (369f / 654f)
+      val chestCenterY = cardH * 0.382f
       val breathScale = 1f + 0.025f * sin(pulsePhase * 2f * PI.toFloat())
 
       // Clipped strictly inside the inner sky-blue upper panel so rays stay behind chest & inside frame
@@ -4543,8 +5263,8 @@ fun StarterPackDialog(
       ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
           val cx = size.width * 0.5f
-          // Align glow/ray center with the chest center (0.376 - 0.154) / 0.44 ≈ 0.505
-          val cy = size.height * 0.505f
+          // Align glow/ray center with the chest center (0.382 - 0.154) / 0.44 ≈ 0.518
+          val cy = size.height * 0.518f
           val maxR = size.maxDimension * 0.62f
           val haloAlpha = 0.74f + 0.22f * sin(pulsePhase * 2f * PI.toFloat())
 
@@ -4623,11 +5343,16 @@ fun StarterPackDialog(
         }
       }
 
-      // 3. Row 2 Col 3 x1000 treasure chest positioned identically to the second reference image
-      Image(
-        painter = painterResource(id = R.drawable.img_starter_pack_chest),
-        contentDescription = "1000 Coins Chest",
-        contentScale = ContentScale.Fit,
+      // 3. New glossy red treasure chest overflowing with gold coins + bold "x1000" text on chest front
+      val starterChestLabel = stringResource(R.string.starter_pack_coins_x1000)
+      val starterChestLabelStyle =
+        MaterialTheme.typography.headlineSmall.copy(
+          fontFamily = LilitaOneFontFamily,
+          fontSize = (cardW.value * 0.095f).coerceIn(22f, 38f).sp,
+          fontWeight = FontWeight.Normal,
+          letterSpacing = 0.4.sp,
+        )
+      Box(
         modifier =
           Modifier
             .align(Alignment.TopCenter)
@@ -4635,7 +5360,59 @@ fun StarterPackDialog(
             .size(width = chestW, height = chestH)
             .scale(breathScale)
             .testTag("starter_pack_chest"),
-      )
+      ) {
+        Image(
+          painter = painterResource(id = R.drawable.img_starter_pack_chest_red),
+          contentDescription = "1000 Coins Chest",
+          contentScale = ContentScale.FillBounds,
+          modifier = Modifier.fillMaxSize(),
+        )
+        val x1000BoxW = chestW * 0.46f
+        Box(
+          modifier =
+            Modifier
+              .align(Alignment.TopStart)
+              .offset(x = chestW * 0.455f - x1000BoxW * 0.5f, y = chestH * 0.72f)
+              .width(x1000BoxW)
+              .testTag("starter_pack_coins_label"),
+          contentAlignment = Alignment.Center,
+        ) {
+          Text(
+            text = starterChestLabel,
+            style =
+              starterChestLabelStyle.copy(
+                drawStyle = Stroke(width = 11.5f, join = StrokeJoin.Round),
+              ),
+            color = Color(0xFF1A0E06),
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+            modifier = Modifier.offset(y = 1.6.dp),
+          )
+          Text(
+            text = starterChestLabel,
+            style =
+              starterChestLabelStyle.copy(
+                drawStyle = Stroke(width = 9.5f, join = StrokeJoin.Round),
+              ),
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+          )
+          Text(
+            text = starterChestLabel,
+            style =
+              starterChestLabelStyle.copy(
+                shadow = Shadow(color = Color(0x99000000), offset = Offset(0f, 1.5f), blurRadius = 1.5f),
+              ),
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+          )
+        }
+      }
 
       // 4. Top-right close (X) button positioned on upper-right ribbon corner
       val closeBtnSize = cardW * 0.112f
@@ -4669,33 +5446,125 @@ fun StarterPackDialog(
         )
       }
 
-      // 5. Middle boosters box (VIP x2, Bus x2, Refresh x2) sized & centered cleanly below chest
-      val rewardW = cardW * 0.50f
-      val rewardH = rewardW * (289f / 777f)
-      Image(
-        painter = painterResource(id = R.drawable.panel_starter_pack_rewards),
-        contentDescription = "2 VIP, 2 Bus Clear, 2 Refresh",
-        contentScale = ContentScale.Fit,
+      // 5. Middle blue rewards box with VIP x2, Bus x2, Refresh x2 arranged in order
+      val rewardW = cardW * 0.54f
+      val rewardH = cardH * 0.158f
+      val qtyTwoLabel = stringResource(R.string.shop_booster_qty_two)
+      val starterQtyStyle =
+        MaterialTheme.typography.labelLarge.copy(
+          fontFamily = LilitaOneFontFamily,
+          fontSize = (rewardH.value * 0.25f).coerceIn(13f, 20f).sp,
+          fontWeight = FontWeight.Normal,
+          letterSpacing = 0.2.sp,
+        )
+      Box(
         modifier =
           Modifier
             .align(Alignment.TopCenter)
-            .offset(y = cardH * 0.602f)
+            .offset(y = cardH * 0.592f)
             .size(width = rewardW, height = rewardH)
             .testTag("starter_pack_rewards_panel"),
-      )
+        contentAlignment = Alignment.Center,
+      ) {
+        Image(
+          painter = painterResource(id = R.drawable.panel_starter_pack_blue_tray),
+          contentDescription = "2 VIP, 2 Bus Clear, 2 Refresh",
+          contentScale = ContentScale.FillBounds,
+          modifier = Modifier.fillMaxSize(),
+        )
+        Row(
+          modifier =
+            Modifier
+              .fillMaxSize()
+              .padding(horizontal = rewardW * 0.065f, vertical = rewardH * 0.075f),
+          horizontalArrangement = Arrangement.SpaceEvenly,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          val starterDialogBoosters =
+            listOf(
+              Pair(R.drawable.ic_shop_booster_vip, R.string.shop_booster_vip_desc),
+              Pair(R.drawable.ic_shop_booster_bus, R.string.shop_booster_bus_desc),
+              Pair(R.drawable.ic_shop_booster_refresh, R.string.shop_booster_refresh_desc),
+            )
+          starterDialogBoosters.forEach { (iconRes, descRes) ->
+            Box(
+              modifier = Modifier.weight(1f).fillMaxSize(),
+              contentAlignment = Alignment.TopCenter,
+            ) {
+              Image(
+                painter = painterResource(id = iconRes),
+                contentDescription = stringResource(descRes),
+                contentScale = ContentScale.Fit,
+                modifier =
+                  Modifier
+                    .fillMaxWidth(0.90f)
+                    .height(rewardH * 0.62f)
+                    .padding(top = rewardH * 0.02f),
+              )
+              Box(
+                modifier =
+                  Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = rewardH * 0.01f),
+                contentAlignment = Alignment.Center,
+              ) {
+                Text(
+                  text = qtyTwoLabel,
+                  style =
+                    starterQtyStyle.copy(
+                      drawStyle = Stroke(width = 6.0f, join = StrokeJoin.Round),
+                    ),
+                  color = Color.Black,
+                  maxLines = 1,
+                  softWrap = false,
+                  modifier = Modifier.offset(y = 0.9.dp),
+                )
+                Text(
+                  text = qtyTwoLabel,
+                  style =
+                    starterQtyStyle.copy(
+                      drawStyle = Stroke(width = 4.8f, join = StrokeJoin.Round),
+                    ),
+                  color = Color.Black,
+                  maxLines = 1,
+                  softWrap = false,
+                )
+                Text(
+                  text = qtyTwoLabel,
+                  style = starterQtyStyle,
+                  color = Color.White,
+                  maxLines = 1,
+                  softWrap = false,
+                )
+              }
+            }
+          }
+        }
+      }
 
-      // 6. Bottom "Rs 500.00" + "50%OFF" price button centered cleanly in lower panel
-      val priceW = cardW * 0.48f
-      val priceH = priceW * (305f / 789f)
+      // 6. Bottom glossy green price button with bold outlined "Rs 550.00" text & red "50% OFF" ribbon
+      val priceW = cardW * 0.510f
+      val priceH = priceW * (191f / 594f)
       val priceInteraction = remember { MutableInteractionSource() }
       val pricePressed by priceInteraction.collectIsPressedAsState()
       val priceScale by animateFloatAsState(if (pricePressed) 0.93f else 1f, spring(), label = "starter_pack_price_scale")
+      val priceLabel =
+        stringResource(
+          id = if (alreadyClaimed) R.string.shop_claimed_label else R.string.shop_starter_pack_price,
+        )
+      val priceTextStyle =
+        MaterialTheme.typography.titleLarge.copy(
+          fontFamily = LilitaOneFontFamily,
+          fontSize = (priceH.value * 0.44f).coerceIn(17f, 25f).sp,
+          fontWeight = FontWeight.Normal,
+          letterSpacing = 0.3.sp,
+        )
 
       Box(
         modifier =
           Modifier
             .align(Alignment.TopCenter)
-            .offset(y = cardH * 0.776f)
+            .offset(y = cardH * 0.798f)
             .size(width = priceW, height = maxOf(priceH, 48.dp))
             .scale(priceScale)
             .clickable(
@@ -4712,12 +5581,78 @@ fun StarterPackDialog(
             .testTag("starter_pack_buy_button"),
         contentAlignment = Alignment.Center,
       ) {
-        Image(
-          painter = painterResource(id = R.drawable.btn_starter_pack_price),
-          contentDescription = if (alreadyClaimed) "Starter Pack Claimed" else "Buy Starter Pack for Rs 500.00",
-          contentScale = ContentScale.Fit,
+        Box(
           modifier = Modifier.size(width = priceW, height = priceH),
-        )
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.btn_starter_pack_price_green),
+            contentDescription = if (alreadyClaimed) "Starter Pack Claimed" else "Buy Starter Pack for Rs 550.00",
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize(),
+          )
+          Box(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(horizontal = priceW * 0.06f)
+                .padding(bottom = priceH * 0.06f),
+            contentAlignment = Alignment.Center,
+          ) {
+            // Subtle dark-green drop shadow
+            Text(
+              text = priceLabel,
+              style =
+                priceTextStyle.copy(
+                  drawStyle = Stroke(width = 8.0f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF063810),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+              modifier = Modifier.offset(y = 1.4.dp),
+            )
+            // Crisp dark-green outline
+            Text(
+              text = priceLabel,
+              style =
+                priceTextStyle.copy(
+                  drawStyle = Stroke(width = 6.5f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF0A4D18),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+            // Bright white foreground text
+            Text(
+              text = priceLabel,
+              style =
+                priceTextStyle.copy(
+                  shadow = Shadow(color = Color(0x88063810), offset = Offset(0f, 1.2f), blurRadius = 1.2f),
+                ),
+              color = Color.White,
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+          }
+          if (!alreadyClaimed) {
+            val badgeW = priceW * 0.56f
+            val badgeH = badgeW * (137f / 404f)
+            Image(
+              painter = painterResource(id = R.drawable.badge_shop_50_off),
+              contentDescription = stringResource(R.string.shop_starter_pack_discount_badge),
+              contentScale = ContentScale.Fit,
+              modifier =
+                Modifier
+                  .align(Alignment.TopEnd)
+                  .offset(x = priceW * 0.035f, y = -badgeH * 0.55f)
+                  .size(width = badgeW, height = badgeH)
+                  .testTag("starter_pack_discount_badge"),
+            )
+          }
+        }
       }
     }
   }
@@ -4969,9 +5904,9 @@ fun NoAdsPackDialog(
         )
       }
 
-      // 5. Glossy dark-purple button (Row 3 Col 2 from sprite sheet) with bold outlined "Rs 3,000.00" text
-      val priceW = cardW * 0.485f
-      val priceH = priceW * (294f / 690f)
+      // 5. Glossy green button with bold dark-green outlined "Rs 3,350.00" text
+      val priceW = cardW * 0.510f
+      val priceH = priceW * (191f / 594f)
       val priceInteraction = remember { MutableInteractionSource() }
       val pricePressed by priceInteraction.collectIsPressedAsState()
       val priceScale by animateFloatAsState(if (pricePressed) 0.93f else 1f, spring(), label = "no_ads_price_scale")
@@ -4982,7 +5917,7 @@ fun NoAdsPackDialog(
       val priceTextStyle =
         MaterialTheme.typography.titleLarge.copy(
           fontFamily = LilitaOneFontFamily,
-          fontSize = (priceH.value * 0.37f).coerceIn(17f, 25f).sp,
+          fontSize = (priceH.value * 0.44f).coerceIn(17f, 25f).sp,
           fontWeight = FontWeight.Normal,
           letterSpacing = 0.3.sp,
         )
@@ -4991,7 +5926,7 @@ fun NoAdsPackDialog(
         modifier =
           Modifier
             .align(Alignment.TopCenter)
-            .offset(y = cardH * 0.808f)
+            .offset(y = cardH * 0.818f)
             .size(width = priceW, height = maxOf(priceH, 48.dp))
             .scale(priceScale)
             .clickable(
@@ -5013,44 +5948,57 @@ fun NoAdsPackDialog(
           contentAlignment = Alignment.Center,
         ) {
           Image(
-            painter = painterResource(id = R.drawable.btn_no_ads_price),
-            contentDescription = if (alreadyUnlocked) "No Ads Pack Active" else "Buy No Ads Pack for Rs 3,000.00",
-            contentScale = ContentScale.Fit,
+            painter = painterResource(id = R.drawable.btn_no_ads_price_green),
+            contentDescription = if (alreadyUnlocked) "No Ads Pack Active" else "Buy No Ads Pack for Rs 3,350.00",
+            contentScale = ContentScale.FillBounds,
             modifier = Modifier.fillMaxSize(),
           )
-          // Subtle dark drop shadow
-          Text(
-            text = priceLabel,
-            style =
-              priceTextStyle.copy(
-                drawStyle = Stroke(width = 9.5f, join = StrokeJoin.Round),
-              ),
-            color = Color(0xFF190233),
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            modifier = Modifier.padding(horizontal = priceW * 0.08f).offset(y = 1.5.dp),
-          )
-          // Crisp dark-purple outline
-          Text(
-            text = priceLabel,
-            style =
-              priceTextStyle.copy(
-                drawStyle = Stroke(width = 8.5f, join = StrokeJoin.Round),
-              ),
-            color = Color(0xFF28054E),
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            modifier = Modifier.padding(horizontal = priceW * 0.08f),
-          )
-          // Bright white foreground text
-          Text(
-            text = priceLabel,
-            style = priceTextStyle,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            modifier = Modifier.padding(horizontal = priceW * 0.08f),
-          )
+          Box(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(horizontal = priceW * 0.06f)
+                .padding(bottom = priceH * 0.06f),
+            contentAlignment = Alignment.Center,
+          ) {
+            // Subtle dark green drop shadow
+            Text(
+              text = priceLabel,
+              style =
+                priceTextStyle.copy(
+                  drawStyle = Stroke(width = 8.0f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF063810),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+              modifier = Modifier.offset(y = 1.4.dp),
+            )
+            // Crisp dark-green outline
+            Text(
+              text = priceLabel,
+              style =
+                priceTextStyle.copy(
+                  drawStyle = Stroke(width = 6.5f, join = StrokeJoin.Round),
+                ),
+              color = Color(0xFF0A4D18),
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+            // Bright white foreground text
+            Text(
+              text = priceLabel,
+              style =
+                priceTextStyle.copy(
+                  shadow = Shadow(color = Color(0x88063810), offset = Offset(0f, 1.2f), blurRadius = 1.2f),
+                ),
+              color = Color.White,
+              textAlign = TextAlign.Center,
+              maxLines = 1,
+              softWrap = false,
+            )
+          }
         }
       }
     }
